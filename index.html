@@ -1,15 +1,26 @@
 <!DOCTYPE html>
-<html lang="th">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Premium HR Rewards | Executive Edition</title>
-    <style>
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #020617; }
-        iframe { width: 100%; height: 100%; border: none; }
-    </style>
+  <meta charset="UTF-8">
 </head>
 <body>
-    <iframe src="https://script.google.com/macros/s/AKfycbyBQN1Uc5VTfmQi21RYay1ynlvSwW9rNNmc1MjG1pHw-jppq5wXgj778ayg4-XaArqa/exec"></iframe>
+
+<button onclick="sendData()">กดส่ง</button>
+
+<script>
+function sendData() {
+  fetch("https://script.google.com/macros/s/AKfycbyBQN1Uc5VTfmQi21RYay1ynlvSwW9rNNmc1MjG1pHw-jppq5wXgj778ayg4-XaArqa/exec", {
+    method: "POST",
+    body: JSON.stringify({
+      name: "Test",
+      score: 100
+    })
+  })
+  .then(res => res.json())
+  .then(data => console.log(data))
+  .catch(err => console.error(err));
+}
+</script>
+
 </body>
 </html>
