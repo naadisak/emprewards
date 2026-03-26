@@ -1,1 +1,21 @@
-
+{
+  "name": "TQM Life+",
+  "short_name": "TQM Life+",
+  "description": "แอปพลิเคชันสำหรับพนักงาน TQM",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/MkXx8g2b/Designer01.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/MkXx8g2b/Designer01.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
