@@ -3,97 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Life+">
     <title>TQM Life+ App</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        /* รีเซ็ตค่าขอบและตั้งหน้าจอให้เต็ม 100% ไม่ให้ขยับได้ */
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; 
-            background-color: #f8fafc; /* สีพื้นหลังเดียวกับแอป */
-            font-family: 'Bai Jamjuree', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #f8fafc; font-family: 'Bai Jamjuree', sans-serif; -webkit-tap-highlight-color: transparent; }
+        #app-frame { width: 100vw; height: 100vh; border: none; display: block; position: absolute; top: 0; left: 0; z-index: 1; }
+        
+        #loader-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #f8fafc; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .loader-logo { font-size: 36px; font-weight: 800; color: #1e3a8a; margin-bottom: 24px; letter-spacing: 2px; animation: pulse 1.5s infinite ease-in-out; }
+        .loader-logo span { color: #3b82f6; }
+        .spinner { width: 45px; height: 45px; border: 4px solid rgba(59, 130, 246, 0.15); border-top-color: #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
+        .loading-text { margin-top: 20px; font-size: 14px; color: #64748b; font-weight: 600; letter-spacing: 1px; }
 
-        /* ตั้งค่า iframe ให้กางเต็มจอ ไร้ขอบ */
-        #app-frame {
-            width: 100vw;
-            height: 100vh;
-            border: none;
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
-
-        /* หน้าจอ Loading ปิดบังจอขาวตอนที่ Google Script กำลังโหลด */
-        #loader-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #f8fafc;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        /* โลโก้ตอนโหลด โยกตามจังหวะ */
-        .loader-logo {
-            font-size: 36px;
-            font-weight: 800;
-            color: #1e3a8a;
-            margin-bottom: 24px;
-            letter-spacing: 2px;
-            animation: pulse 1.5s infinite ease-in-out;
-        }
-
-        .loader-logo span {
-            color: #3b82f6;
-        }
-
-        /* วงแหวนหมุนติ้วๆ */
-        .spinner {
-            width: 45px;
-            height: 45px;
-            border: 4px solid rgba(59, 130, 246, 0.15);
-            border-top-color: #2563eb;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        .loading-text {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #64748b;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-
-        @keyframes spin { 
-            100% { transform: rotate(360deg); } 
-        }
-        @keyframes pulse { 
-            0% { transform: scale(1); opacity: 1; } 
-            50% { transform: scale(1.05); opacity: 0.8; } 
-            100% { transform: scale(1); opacity: 1; } 
-        }
-
-        /* คลาสสำหรับสั่งซ่อนหน้า Loading ตอนโหลดเสร็จ */
-        .fade-out {
-            opacity: 0 !important;
-            visibility: hidden !important;
-        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
+        .fade-out { opacity: 0 !important; visibility: hidden !important; }
     </style>
 </head>
 <body>
@@ -107,13 +36,29 @@
     <iframe id="app-frame" src="https://script.google.com/macros/s/AKfycbxpjUBvfIVhD1lkYoBEDwzS9gR5aTBrv2J67HIBaHL7qgmd2Ve7tDBVLakBw7_yzFt_/exec" allow="autoplay; fullscreen"></iframe>
 
     <script>
-        // ใช้ JavaScript เช็คว่า iframe ดึงข้อมูล Google Script มาเสร็จหรือยัง
-        document.getElementById('app-frame').onload = function() {
-            // แอบหน่วงเวลาไว้นิดนึง (600ms) ให้ชัวร์ว่าฝั่งโน้นเรนเดอร์ UI เสร็จแล้ว ค่อยเอาฉากบังออก
+        const iframe = document.getElementById('app-frame');
+        
+        // เมื่อ Apps Script โหลดเสร็จ
+        iframe.onload = function() {
             setTimeout(function() {
                 document.getElementById('loader-screen').classList.add('fade-out');
+                
+                // ยิงข้อมูล Session ที่ฝากเก็บไว้บน GitHub กลับไปให้ iframe อัตโนมัติ (แก้ปัญหา iPhone ลืม Login)
+                const savedSession = localStorage.getItem('tqm_session_pro');
+                if (savedSession) {
+                    iframe.contentWindow.postMessage({ type: 'INIT_SESSION', data: savedSession }, '*');
+                }
             }, 600); 
         };
+
+        // ฟังคำสั่งจาก Apps Script เพื่อรับฝากข้อมูล (ยิงผ่าน postMessage)
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'SAVE_SESSION') {
+                localStorage.setItem('tqm_session_pro', event.data.data);
+            } else if (event.data && event.data.type === 'CLEAR_SESSION') {
+                localStorage.removeItem('tqm_session_pro');
+            }
+        });
     </script>
 </body>
 </html>
