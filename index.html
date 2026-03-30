@@ -32,6 +32,33 @@
             // โหลดหน้า Index.html ปกติ
             iframe.src = GAS_WEB_APP_URL;
         }
+
+        // ==============================================================
+        // 🚀 ระบบช่วยจำรหัสผ่าน ทะลุกำแพง iPhone (iOS ITP Bypass)
+        // ==============================================================
+        
+        // 4. ดักฟังคำสั่งจากหน้าเว็บด้านใน (GAS) ว่าล็อกอินหรือล็อกเอาท์
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'SAVE_SESSION') {
+                // ถ้า GAS บอกว่า "ล็อกอินผ่านแล้ว ฝากจำด้วย" -> GitHub จะจำไว้ให้
+                localStorage.setItem('tqm_master_session', event.data.data);
+            } else if (event.data && event.data.type === 'CLEAR_SESSION') {
+                // ถ้า GAS บอกว่า "ออกจากระบบแล้ว ลบทิ้งเลย" -> GitHub จะลบทิ้ง
+                localStorage.removeItem('tqm_master_session');
+            }
+        });
+
+        // 5. ทันทีที่ iframe โหลดเสร็จปุ๊บ ให้เช็คว่า GitHub จำใครไว้ไหม
+        iframe.onload = function() {
+            const savedSession = localStorage.getItem('tqm_master_session');
+            if (savedSession) {
+                // โยนข้อมูลที่จำไว้มุดทะลุ iframe กลับไปให้ GAS (GAS จะเอาไป Auto-Login ต่อเอง)
+                iframe.contentWindow.postMessage({
+                    type: 'INIT_SESSION', 
+                    data: savedSession
+                }, '*');
+            }
+        };
     </script>
 
 </body>
