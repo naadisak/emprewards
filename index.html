@@ -588,52 +588,24 @@
         }, 500); 
     };
 
+    // 🔥 แก้ไขเป็นตัว แอลเล็ก (l) ตามรูปของลูกพี่เป๊ะๆ!
+    const LIFF_ID = "2009559729-LZSwowcl"; 
+
     // ==========================================
-    // 🟢 ระบบเชื่อมต่อและดักจับ LINE LIFF 
+    // 🟢 ระบบเชื่อมต่อและดักจับ LINE LIFF (เวอร์ชันสมูท ไม่เด้งแท็บใหม่)
     // ==========================================
     function initializeLiff() {
         if(typeof liff === 'undefined') return;
         
         liff.init({ liffId: LIFF_ID }).then(() => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const linkEmpId = urlParams.get('empId');
-            
-            // ถ้ามี empId แนบมาบน URL แปลว่าเพิ่งกลับมาจากหน้า LIFF เพื่อทำการเชื่อมต่อ
-            if (linkEmpId) {
-                if (!liff.isLoggedIn()) {
-                    liff.login({ redirectUri: window.location.href });
-                } else {
-                    showLoader();
-                    liff.getProfile().then(profile => {
-                        const lineUserId = profile.userId;
-                        
-                        // ส่งไปเซฟหลังบ้าน (Code.gs ต้องมีฟังก์ชัน gsLinkLine นะขอรับ)
-                        google.script.run.withSuccessHandler(r => {
-                            hideLoader();
-                            if(r && r.status === 'success') {
-                                Swal.fire('สำเร็จ!', 'ระบบบันทึก LINE ของคุณเรียบร้อยแล้ว', 'success').then(() => {
-                                    // อัปเดตข้อมูล Session ในเครื่อง
-                                    let u = getSession();
-                                    if(u && String(u.empId) === String(linkEmpId)) { 
-                                        u.lineId = lineUserId; 
-                                        saveSession(u); 
-                                    }
-                                    // ทำความสะอาด URL ไม่ให้มี ?empId ค้างอยู่
-                                    window.location.href = window.location.pathname; 
-                                });
-                            } else {
-                                Swal.fire('ผิดพลาด', r.message, 'error').then(()=> window.location.href = window.location.pathname);
-                            }
-                        }).withFailureHandler(e => {
-                            hideLoader();
-                            Swal.fire('เชื่อมต่อล้มเหลว', 'ไม่สามารถคุยกับเซิร์ฟเวอร์ได้', 'error').then(()=> window.location.href = window.location.pathname);
-                        }).gsLinkLine(linkEmpId, lineUserId);
-                        
-                    }).catch(err => {
-                        hideLoader();
-                        console.error("LIFF Profile Error:", err);
-                        Swal.fire('ผิดพลาด', 'ไม่สามารถดึงข้อมูลโปรไฟล์ LINE ได้', 'error');
-                    });
+            if (liff.isLoggedIn()) {
+                // ดักจับว่าเพิ่งกลับมาจากการกด "เชื่อมต่อ LINE" หรือไม่
+                const urlParams = new URLSearchParams(window.location.search);
+                const action = urlParams.get('action');
+                const linkEmpId = urlParams.get('empId');
+                
+                if (action === 'linkLine' && linkEmpId) {
+                    processLinkLine(linkEmpId);
                 }
             }
         }).catch(err => {
@@ -644,19 +616,55 @@
     function connectLine() {
         const u = getSession(); if(!u) return;
         
-        // พาผู้ใช้ไปหน้า LIFF พร้อมแนบรหัสพนักงานไปกับ URL
-        const lineAuthUrl = "https://liff.line.me/" + LIFF_ID + "?empId=" + u.empId; 
-        
         Swal.fire({ 
             title: 'เชื่อมต่อ LINE', 
-            text: 'ระบบจะนำท่านไปยืนยันบัญชี LINE โปรดรอสักครู่', 
+            text: 'ระบบจะนำท่านไปหน้ายืนยันบัญชี LINE', 
             icon: 'info', 
             showCancelButton: true, 
             confirmButtonText: 'เชื่อมต่อเลย' 
         }).then((result) => { 
             if (result.isConfirmed) { 
-                window.location.href = lineAuthUrl; // 🚀 เปลี่ยนหน้าไปเลย ไม่ต้องเปิดแท็บใหม่
+                if (!liff.isLoggedIn()) {
+                    // ถ้ายังไม่ล็อกอิน ให้ล็อกอินในหน้าเดิมแล้วเด้งกลับมาพร้อม parameter
+                    const redirectUrl = window.location.origin + window.location.pathname + "?action=linkLine&empId=" + u.empId;
+                    liff.login({ redirectUri: redirectUrl });
+                } else {
+                    // ถ้าล็อกอินค้างไว้อยู่แล้ว (เช่นเปิดในแอป LINE) ประมวลผลเลย
+                    processLinkLine(u.empId);
+                }
             } 
+        });
+    }
+
+    function processLinkLine(empId) {
+        showLoader();
+        liff.getProfile().then(profile => {
+            const lineUserId = profile.userId;
+            
+            // ส่งไปให้ Google Script หลังบ้านบันทึกลง Sheet
+            google.script.run.withSuccessHandler(r => {
+                hideLoader();
+                if(r && r.status === 'success') {
+                    Swal.fire('สำเร็จ!', 'ระบบบันทึก LINE ของคุณเรียบร้อยแล้ว', 'success').then(() => {
+                        let u = getSession();
+                        if(u && String(u.empId) === String(empId)) { 
+                            u.lineId = lineUserId; 
+                            saveSession(u); 
+                        }
+                        // ล้าง URL ให้สะอาด กลับสู่หน้าปกติ
+                        window.location.href = window.location.pathname; 
+                    });
+                } else {
+                    Swal.fire('ผิดพลาด', r.message, 'error').then(()=> window.location.href = window.location.pathname);
+                }
+            }).withFailureHandler(e => {
+                hideLoader();
+                Swal.fire('เชื่อมต่อล้มเหลว', 'ไม่สามารถส่งข้อมูลไปหลังบ้านได้', 'error').then(()=> window.location.href = window.location.pathname);
+            }).gsLinkLine(empId, lineUserId); // 👈 เรียกฟังก์ชันหลังบ้าน
+            
+        }).catch(err => {
+            hideLoader();
+            Swal.fire('ผิดพลาด', 'ไม่สามารถดึงข้อมูลโปรไฟล์ LINE ได้', 'error');
         });
     }
     // ==========================================
