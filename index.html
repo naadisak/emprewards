@@ -776,18 +776,25 @@
     }
 
     function openProfile() {
-        try { const u=getSession();
-            if(!u)return;
-            document.getElementById('editIntPhone').value=u.intPhone&&u.intPhone!=='-'?u.intPhone:'';document.getElementById('editMobilePhone').value=u.mobilePhone&&u.mobilePhone!=='-'?u.mobilePhone:'';document.getElementById('editEmail').value=u.email&&u.email!=='-'?u.email:'';uploadImgBase64=null;
-            let tp=dashboardData.myTotalPoints||0, tm=dashboardData.myThemePtsMap||{}; document.getElementById('profileTotalPts').innerText=tp;
-            let tn="Silver Member",tc="bg-slate-300 text-slate-800",rc="border-slate-200";
-            if(tp>=201){tn="Platinum Member";tc="bg-gradient-to-r from-slate-700 to-slate-900 text-slate-100";rc="border-slate-800";}else if(tp>=51){tn="Gold Member";tc="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white";rc="border-yellow-400";}
-            const vb=document.getElementById('vipBadge');if(vb){vb.className=`absolute -bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-1.5 rounded-full text-[10px] font-bold shadow-md whitespace-nowrap z-20 border border-white tracking-widest ${tc}`;vb.innerText=tn;}
-            const ap=document.getElementById('editAvatarPreview');if(ap){ap.src=u.avatar||DEFAULT_AVATAR;ap.className=`w-28 h-28 rounded-full object-cover border-[4px] shadow-lg relative z-10 bg-slate-100 ${rc}`;}
-            const mc=document.getElementById('profileThemePts');if(mc){mc.innerHTML='';if(tp===0){mc.innerHTML=getEmptyStateHTML("ยังไม่มีคะแนน... ร่วมกิจกรรมเพื่ออัปเกรดระดับเลย!",`<svg class="w-10 h-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>`);}else{const clrs=['bg-blue-500','bg-emerald-500','bg-amber-500','bg-rose-500','bg-purple-500'];let ci=0;for(let t in tm){let p=tm[t],pc=tp>0?Math.round((p/tp)*100):0,bc=clrs[ci%clrs.length];ci++;mc.innerHTML+=`<div><div class="flex justify-between text-[11px] mb-1.5 font-medium"><span class="text-slate-700">${t}</span><span class="text-slate-900 font-bold">${p} pts <span class="text-slate-400 font-normal">(${pc}%)</span></span></div><div class="w-full bg-slate-100 rounded-full h-2"><div class="${bc} h-2 rounded-full transition-all duration-1000" style="width: ${pc}%"></div></div></div>`;}}}
-            document.getElementById('navBtnHome').classList.replace('text-blue-600','text-slate-400');document.getElementById('navBtnProfile').classList.replace('text-slate-400','text-blue-600');
-            document.getElementById('screen-profile').classList.add('active');
-        } catch(e){}
+        const u = getSession(); 
+        if(!u) return;
+        
+        if(document.getElementById('editIntPhone')) {
+            document.getElementById('editIntPhone').value = u.intPhone && u.intPhone !== '-' ? u.intPhone : '';
+        }
+        if(document.getElementById('editMobilePhone')) {
+            document.getElementById('editMobilePhone').value = u.mobilePhone && u.mobilePhone !== '-' ? u.mobilePhone : '';
+        }
+        if(document.getElementById('editEmail')) {
+            document.getElementById('editEmail').value = u.email && u.email !== '-' ? u.email : '';
+        }
+        
+        const ap = document.getElementById('editAvatarPreview');
+        if(ap) ap.src = u.avatar || DEFAULT_AVATAR;
+        
+        // สั่งเด้งหน้าต่างโปรไฟล์ขึ้นมาให้กด Logout ได้แน่นอน 100%
+        const screenProfile = document.getElementById('screen-profile');
+        if(screenProfile) screenProfile.classList.add('active');
     }
 
     function closeProfile() { document.getElementById('screen-profile').classList.remove('active');
