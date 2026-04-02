@@ -318,7 +318,7 @@
 
 <script>
     // ==========================================
-    // 🚀 API GATEWAY PROXY (อัปเกรดเกราะป้องกัน 100%)
+    // 🚀 API GATEWAY PROXY
     // ==========================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwmO536QyvMlTMrwiJ-AuoqNSyfimgaaWUYc5qp8UQKMNgap6UGk0TpQL1ZIjTTArjx/exec"; 
 
@@ -335,20 +335,22 @@
                         get: function(target, prop) {
                             if (prop in target) return target[prop];
                             return function(...args) {
-                                // 🔥 ท่ามาตรฐาน Google: ต้องใช้ text/plain เพื่อหลบ Preflight CORS
                                 fetch(GAS_API_URL, {
+                                    redirect: "follow",
                                     method: 'POST',
                                     headers: {
-                                        'Content-Type': 'text/plain;charset=utf-8'
+                                        "Content-Type": "text/plain;charset=utf-8"
                                     },
                                     body: JSON.stringify({ action: prop, args: args })
                                 })
-                                .then(res => res.json())
+                                .then(res => {
+                                    if(!res.ok) throw new Error("Google API Error: " + res.status);
+                                    return res.json();
+                                })
                                 .then(data => { if (_success) _success(data); })
                                 .catch(err => { 
-                                    console.error("CORS / API Error:", err); 
+                                    console.error("API Error:", err); 
                                     if (_failure) _failure(err); 
-                                    else Swal.fire('ข้อผิดพลาด', 'ไม่สามารถดึงข้อมูลจากเซิร์ฟเวอร์ได้', 'error');
                                 });
                             }
                         }
@@ -363,109 +365,258 @@
     const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
     
     let tempEmpId='', isUserFirstTime=true, dashboardData={}; 
+    let currentHofTab='allTime', currentRemainingQuota=0, praiseInterval, currentPraiseIdx=0;
+    const thaiMonths = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+    
     let allEmployees=[], selectedReceiverId=null, selectedTheme=null, uploadImgBase64=null;
-    let currentUserSession = null;
-    let currentRemainingQuota=0;
+    let inboxData=[], inboxSyncTimer, fetchDashboardTimer, rewardsList=[], activeRewardObj=null;
+    let ptrStartY=0, ptrCurrentY=0, isPulling=false, ptrEl, ptrContainer;
 
+    let currentUserSession = null;
+    let hasShownWelcomeAlert = false;
+    
     function getSession() { 
         if(currentUserSession) return currentUserSession;
         const s = localStorage.getItem('tqm_session'); 
-        if(s) { try { currentUserSession = JSON.parse(decodeURIComponent(atob(s))); return currentUserSession; } catch(e) { clearSession(); } } 
+        if(s) { 
+            try {
+                currentUserSession = JSON.parse(decodeURIComponent(atob(s)));
+                return currentUserSession; 
+            } catch(e) {
+                clearSession();
+            }
+        } 
         return null;
     }
-    function saveSession(u) { currentUserSession = u; localStorage.setItem('tqm_session', btoa(encodeURIComponent(JSON.stringify(u)))); }
-    function clearSession() { currentUserSession = null; localStorage.removeItem('tqm_session'); }
 
-    function showLoader(){document.getElementById('globalLoader').classList.add('active');} 
-    function hideLoader(){document.getElementById('globalLoader').classList.remove('active');}
-    function showToast(m,t='info'){ const c=document.getElementById('toastContainer'); c.innerHTML=m; c.className=`toast-notification bg-slate-800 text-white`; c.classList.add('show'); setTimeout(()=>c.classList.remove('show'),3000); }
+    function saveSession(u) { 
+        currentUserSession = u; 
+        localStorage.setItem('tqm_session', btoa(encodeURIComponent(JSON.stringify(u))));
+    }
+
+    function clearSession() { 
+        currentUserSession = null;
+        localStorage.removeItem('tqm_session'); 
+        localStorage.removeItem('tqm_dash_cache'); // ลบแคชตอนออกระบบ
+    }
 
     window.onload = () => {
+        setupPullToRefresh();
         setTimeout(() => { 
-            const u = getSession(); 
-            if(u) { renderDashboardInfo(u); fetchDashboardData(); fetchPraiseData(); } 
+            if(!document.getElementById('screen-dashboard').classList.contains('active')) { 
+                const u = getSession(); 
+                if(u) {
+                    renderDashboardInfo(u); 
+                    fetchDashboardData(); 
+                    fetchPraiseData(); 
+                    startInboxSync();
+                    startDashboardSync();
+                } 
+            } 
         }, 500); 
     };
+
+    function setupPullToRefresh() {
+        ptrEl = document.getElementById('screen-dashboard'); ptrContainer = document.getElementById('ptrContainer'); if(!ptrEl || !ptrContainer) return;
+        ptrEl.addEventListener('touchstart', e => { if(ptrEl.scrollTop===0){ptrStartY=e.touches[0].clientY;isPulling=true;} }, {passive:true});
+        ptrEl.addEventListener('touchmove', e => { if(!isPulling)return; ptrCurrentY=e.touches[0].clientY; let d=ptrCurrentY-ptrStartY; if(d>0&&ptrEl.scrollTop===0){ptrEl.classList.add('screen-pulling');ptrContainer.classList.add('ptr-pulling');ptrEl.style.transform=`translateY(${Math.min(d*0.4,60)}px)`;} }, {passive:true});
+        ptrEl.addEventListener('touchend', () => { if(!isPulling)return; isPulling=false; let d=ptrCurrentY-ptrStartY; ptrEl.classList.remove('screen-pulling');ptrEl.style.transform=''; if(d>100&&ptrEl.scrollTop===0){haptic('light');ptrContainer.classList.remove('ptr-pulling');ptrEl.classList.add('screen-loading');ptrContainer.classList.add('ptr-loading');fetchDashboardData(()=>{setTimeout(()=>{ptrEl.classList.remove('screen-loading');ptrContainer.classList.remove('ptr-loading');showToast('อัปเดตข้อมูลล่าสุดแล้ว','success');},500);});}else{ptrContainer.classList.remove('ptr-pulling');} });
+    }
+
+    function haptic(type='light') { try{if(!navigator.vibrate)return;if(type==='light')navigator.vibrate(15);else if(type==='heavy')navigator.vibrate([30,50,30]);else if(type==='success')navigator.vibrate([15,30,15,30,30]);else if(type==='error')navigator.vibrate([50,50,50]);}catch(e){} }
+    function showLoader(){document.getElementById('globalLoader').classList.add('active');} function hideLoader(){document.getElementById('globalLoader').classList.remove('active');}
+    function escapeHTML(str){if(!str)return'';return String(str).replace(/[&<>'"]/g,t=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t));}
+    function maskEmpInfo(id,fName,lName){try{let sId=id?String(id):'---';let mId=sId.length>3?sId.substring(0,3)+'***':sId+'***';let sFName=fName?String(fName):'ไม่ระบุ';let mLName=lName?String(lName).charAt(0)+'***':'';return{id:mId,name:sFName+' '+mLName};}catch(e){return{id:'***',name:'Unknown'};}}
+    function showToast(m,t='info'){const c=document.getElementById('toastContainer');if(!c)return;c.innerHTML=m;c.className=`toast-notification toast-${t}`;setTimeout(()=>c.classList.add('show'),10);setTimeout(()=>c.classList.remove('show'),3500);if(t==='error')haptic('error');}
+    function shootConfetti(){if(typeof confetti==='function'){haptic('success');confetti({particleCount:150,spread:80,origin:{y:0.6},colors:['#3b82f6','#eab308','#ec4899','#10b981']});}}
+    function getEmptyStateHTML(m,i){return`<div class="flex flex-col items-center justify-center py-8 w-full text-center"><div class="text-slate-300 mb-3 bg-slate-50 p-4 rounded-full shadow-inner">${i}</div><p class="text-[13px] font-medium text-slate-500">${m}</p></div>`;}
+
+    function renderSkeletons() {
+        try {
+            const hof=Array(3).fill(0).map(()=>`<div class="snap-center shrink-0 w-[140px] bg-white rounded-[1.5rem] p-4 border border-slate-100 flex flex-col items-center"><div class="w-10 h-4 skeleton mb-4"></div><div class="w-14 h-14 rounded-full skeleton mb-3"></div><div class="w-full h-3 skeleton mb-2"></div><div class="w-1/2 h-2 skeleton mb-4"></div><div class="w-full h-8 skeleton rounded-[0.6rem]"></div></div>`).join('');
+            const hc=document.getElementById('dynamicHofContainer');if(hc)hc.innerHTML=hof;
+            const nw=Array(2).fill(0).map(()=>`<div class="snap-center shrink-0 w-[240px] bg-white rounded-[1.2rem] overflow-hidden border border-slate-100"><div class="w-full h-32 skeleton"></div><div class="p-4"><div class="w-16 h-4 skeleton mb-2"></div><div class="w-full h-4 skeleton mb-1"></div><div class="w-2/3 h-4 skeleton"></div></div></div>`).join('');
+            const nc=document.getElementById('newsContainer');if(nc)nc.innerHTML=nw;
+        } catch(e){}
+    }
 
     function switchScreen(sId) {
         document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
         document.getElementById(sId).classList.add('active');
-        const nav = document.getElementById('mainNavbar'); const fab = document.getElementById('fabPraiseBtn');
+        document.querySelectorAll('.login-bg').forEach(bg=>bg.style.display=(sId.includes('login')||sId==='screen-setup-pin')?'block':'none');
+        const nav = document.getElementById('mainNavbar');
+        const fab = document.getElementById('fabPraiseBtn');
         if(nav) {
-            if(['screen-dashboard','screen-rewards'].includes(sId)){ nav.classList.remove('hidden'); if(fab) fab.style.display = 'block'; } 
-            else { nav.classList.add('hidden'); if(fab) fab.style.display = 'none'; }
+            if(['screen-dashboard','screen-rewards'].includes(sId)){
+                nav.classList.remove('hidden');
+                if(fab) fab.style.display = 'block';
+            } else {
+                nav.classList.add('hidden');
+                if(fab) fab.style.display = 'none';
+            }
+            if(sId==='screen-dashboard'){document.getElementById('navBtnHome').classList.replace('text-slate-400','text-blue-600');document.getElementById('navBtnRewards').classList.replace('text-blue-600','text-slate-400');}
+            else if(sId==='screen-rewards'){document.getElementById('navBtnHome').classList.replace('text-blue-600','text-slate-400');document.getElementById('navBtnRewards').classList.replace('text-slate-400','text-blue-600');}
         }
     }
 
-    function goHome() { 
-        document.getElementById('screen-profile').classList.remove('active'); 
-        document.getElementById('praiseOverlay').classList.remove('active'); 
-        document.getElementById('screen-praise').classList.remove('active'); 
-        switchScreen('screen-dashboard'); 
-    }
+    function goHome() { document.getElementById('screen-profile').classList.remove('active');
+        document.getElementById('praiseOverlay').classList.remove('active'); document.getElementById('screen-praise').classList.remove('active'); switchScreen('screen-dashboard'); const db=document.getElementById('screen-dashboard'); if(db)db.scrollTo({top:0,behavior:'smooth'}); }
 
     function checkUser() {
-        const id=document.getElementById('empId').value.trim(); if(!id){showToast('กรุณากรอกรหัสพนักงาน','error');return;}
-        showLoader();
-        google.script.run.withSuccessHandler(r=>{
-            hideLoader();
-            if(r&&r.status==='success'){
-                tempEmpId=id; isUserFirstTime=r.isFirstTime;
-                document.getElementById('loginName').innerText=r.name.split(' ')[0];
-                document.getElementById('loginAvatar').src=r.avatar||DEFAULT_AVATAR;
-                document.getElementById('passwordLabel').innerText=isUserFirstTime?"4 ตัวท้ายเบอร์มือถือ":"ใส่รหัส PIN 6 หลัก";
-                switchScreen('screen-login-step2');
-            }else{showToast(r.message,'error');}
-        }).withFailureHandler(e=>{hideLoader();showToast('เชื่อมต่อล้มเหลว','error');}).gsCheckUser(id);
+        try { haptic('light');
+            const id=document.getElementById('empId').value.trim(); if(!id){showToast('กรุณากรอกรหัสพนักงาน','error');return;}
+            if(typeof google==='undefined'){showToast('❌ โปรดรันโปรแกรมผ่าน Web App ของ Google','error');return;}
+            const b=document.getElementById('btnNextText');
+            if(b)b.innerText="กำลังตรวจสอบ..."; showLoader();
+            google.script.run.withSuccessHandler(r=>{hideLoader();if(b)b.innerText="ถัดไป";if(r&&r.status==='success'){tempEmpId=id;isUserFirstTime=r.isFirstTime;const sn=r.name||'ไม่ระบุชื่อ';const sa=r.avatar||DEFAULT_AVATAR;document.getElementById('loginName').innerText=sn.split(' ')[0];const el=document.getElementById('loginAvatar');if(el)el.src=sa;if(isUserFirstTime){document.getElementById('passwordLabel').innerText="4 ตัวท้ายเบอร์มือถือ";document.getElementById('password').maxLength=4;}else{document.getElementById('passwordLabel').innerText="ใส่รหัส PIN 6 หลัก";document.getElementById('password').maxLength=6;}document.getElementById('password').value='';switchScreen('screen-login-step2');}else{showToast(r?r.message:'ไม่พบข้อมูล','error');}}).withFailureHandler(e=>{hideLoader();if(b)b.innerText="ถัดไป";showToast('เชื่อมต่อเซิร์ฟเวอร์ล้มเหลว','error');}).gsCheckUser(id);
+        } catch(e){hideLoader();showToast('Error','error');}
     }
 
     function doLogin() {
-        const p=document.getElementById('password').value.trim(); if(!p){showToast('กรุณากรอกรหัสผ่าน','error');return;}
-        showLoader();
-        google.script.run.withSuccessHandler(r=>{
-            hideLoader();
-            if(r&&r.status==='success'){
-                if(r.isFirstTime) switchScreen('screen-setup-pin');
-                else { saveSession(r.userData); renderDashboardInfo(r.userData); fetchDashboardData(); fetchPraiseData(); showToast(`ยินดีต้อนรับ`,'success'); }
-            } else { showToast(r.message,'error'); }
-        }).withFailureHandler(e=>{hideLoader();showToast('เชื่อมต่อล้มเหลว','error');}).gsLogin(tempEmpId,p);
+        try { haptic('light');
+            const p=document.getElementById('password').value.trim(); if(!p){showToast('กรุณากรอกรหัสผ่าน','error');return;}
+            const b=document.getElementById('btnLoginText'); if(b)b.innerText="กำลังเข้าสู่ระบบ..."; showLoader();
+            google.script.run.withSuccessHandler(r=>{hideLoader();if(b)b.innerText="เข้าสู่ระบบ";
+                if(r&&r.status==='success'){
+                    if(r.isFirstTime) switchScreen('screen-setup-pin');
+                    else {
+                        saveSession(r.userData); 
+                        renderDashboardInfo(r.userData);
+                        fetchDashboardData();
+                        fetchPraiseData();
+                        startInboxSync();
+                        startDashboardSync();
+                        showToast(`ยินดีต้อนรับ, คุณ ${r.userData.name.split(' ')[0]}`,'success');
+                    }
+                } else {
+                    showToast(r?r.message:'รหัสผ่านไม่ถูกต้อง','error');
+                }
+            }).withFailureHandler(e=>{hideLoader();if(b)b.innerText="เข้าสู่ระบบ";showToast('เชื่อมต่อล้มเหลว','error');}).gsLogin(tempEmpId,p);
+        } catch(e){hideLoader();}
     }
 
     function doSetupPin() {
-        const p=document.getElementById('newPin').value.trim(); if(p.length!==6){showToast('กรุณากรอก PIN 6 หลัก','error');return;}
-        showLoader();
-        google.script.run.withSuccessHandler(r=>{
-            hideLoader();
-            if(r&&r.status==='success'){ saveSession(r.userData); renderDashboardInfo(r.userData); fetchDashboardData(); fetchPraiseData(); switchScreen('screen-dashboard'); } 
-            else { showToast(r.message,'error'); }
-        }).withFailureHandler(e=>{hideLoader();showToast('เชื่อมต่อล้มเหลว','error');}).gsSetPin(tempEmpId,p);
+        try { haptic('light');
+            const p=document.getElementById('newPin').value.trim(); if(p.length!==6){showToast('กรุณากรอก PIN 6 หลัก','error');return;}
+            const b=document.getElementById('btnPinText'); if(b)b.innerText="กำลังบันทึก...";
+            showLoader();
+            google.script.run.withSuccessHandler(r=>{hideLoader();if(b)b.innerText="ยืนยันรหัส PIN";
+                if(r&&r.status==='success'){
+                    saveSession(r.userData);
+                    renderDashboardInfo(r.userData);
+                    fetchDashboardData();
+                    fetchPraiseData();
+                    startInboxSync();
+                    startDashboardSync();
+                    showToast('ตั้งรหัส PIN สำเร็จ!','success');
+                    shootConfetti();
+                } else {
+                    showToast(r?r.message:'ตั้งรหัสไม่สำเร็จ','error');
+                }
+            }).withFailureHandler(e=>{hideLoader();if(b)b.innerText="ยืนยันรหัส PIN";showToast('เชื่อมต่อล้มเหลว','error');}).gsSetPin(tempEmpId,p);
+        } catch(e){hideLoader();}
     }
 
     function renderDashboardInfo(u) {
-        if(!u)return; switchScreen('screen-dashboard');
-        document.getElementById('txtFirstName').innerText=u.name.split(' ')[0]; document.getElementById('imgAvatar').src=u.avatar||DEFAULT_AVATAR;
-        document.getElementById('txtFullName').innerText=u.name; document.getElementById('txtDept').innerText=u.dept||'ไม่ระบุแผนก';
-        document.getElementById('txtCardNumbers').innerText=`${u.empId} ${u.mobilePhone} ${u.intPhone}`;
+        try { if(!u)return;
+            switchScreen('screen-dashboard'); const sn=u.name||'ไม่ระบุชื่อ',sa=u.avatar||DEFAULT_AVATAR;
+            const tFN=document.getElementById('txtFirstName');if(tFN)tFN.innerText=sn.split(' ')[0];
+            const iA=document.getElementById('imgAvatar');if(iA)iA.src=sa;
+            const cBA=document.getElementById('cardBgAvatar');if(cBA)cBA.src=sa;
+            const h=new Date().getHours();const tG=document.getElementById('txtGreeting');if(tG)tG.innerText=h<12?"อรุณสวัสดิ์ครับ":h<18?"สวัสดีตอนบ่ายครับ":"สวัสดีตอนเย็นครับ";
+            const tN=document.getElementById('txtFullName');if(tN)tN.innerText=sn;
+            const gSV=(v)=>(v&&v!=='-'&&String(v).toLowerCase()!=='undefined')?String(v).trim():'-';
+            const tD=document.getElementById('txtDept');if(tD)tD.innerText=gSV(u.dept)!=='-'?gSV(u.dept):'ไม่ระบุแผนก';
+            const cE=u.empId||'000000',cM=gSV(u.mobilePhone)==='-'?'0000000000':gSV(u.mobilePhone),cI=gSV(u.intPhone)==='-'?'0000':gSV(u.intPhone);
+            const tCN=document.getElementById('txtCardNumbers');if(tCN)tCN.innerText=`${cE} ${cM} ${cI}`;
+            const tE=document.getElementById('txtEmail');if(tE)tE.innerText=gSV(u.email)==='-'?'email@domain.com':gSV(u.email);
+        } catch(e){}
     }
 
-    function fetchDashboardData() {
-        const u=getSession(); if(!u)return;
-        google.script.run.withSuccessHandler(r=>{
-            if(r&&r.status==='success'){
-                dashboardData=r.data;
-                document.getElementById('cardTotalPts').innerText=r.data.myTotalPoints||0;
-                document.getElementById('rewardsAvailablePts').innerText=r.data.myTotalPoints||0;
-                checkSpecialCampaign();
+    function startDashboardSync() { 
+        clearInterval(fetchDashboardTimer);
+        fetchDashboardTimer = setInterval(() => fetchDashboardData(null, true), 30000); 
+    }
+
+    // ==========================================
+    // ⚡ ฟังก์ชันโหลดข้อมูลไวแสง (แก้ปัญหาช้า & ข้อมูลหาย 80%)
+    // ==========================================
+    function fetchDashboardData(cb, isSilent = false) {
+        const u = getSession(); if (!u) return;
+
+        // 1. ดึง Cache มาโชว์ทันที (ไว 0.1 วินาที)
+        const cached = localStorage.getItem('tqm_dash_cache');
+        if (cached) {
+            try { 
+                dashboardData = JSON.parse(cached); 
+                updateDashboardUI(); // สั่งวาดหน้าจอจากของเก่าก่อน
+            } catch(e){}
+        } else {
+            renderSkeletons(); // ถ้าไม่มี Cache ให้โชว์โครงกระดูกรอ
+        }
+
+        // 2. ดึงข้อมูลล่าสุดจากหลังบ้านแบบ Background
+        google.script.run.withSuccessHandler(r => {
+            if (r && r.status === 'success') {
+                dashboardData = r.data || {};
+                localStorage.setItem('tqm_dash_cache', JSON.stringify(dashboardData)); // อัปเดต Cache ใหม่
+                updateDashboardUI(); // 🚀 วาดหน้าจอทับด้วยข้อมูลสดใหม่ (แก้จุดที่ข้อมูลหาย 80%)
+            } else {
+                if (!isSilent) showToast(r ? r.message : 'โหลดข้อมูลล้มเหลว', 'error');
+            } 
+            if (cb) cb();
+        }).withFailureHandler(err => {
+            if (!isSilent && !cached) { // ถ้าพังและไม่มีแคช ค่อยโชว์แจ้งเตือน
+                const hc = document.getElementById('dynamicHofContainer');
+                if (hc) hc.innerHTML = getEmptyStateHTML("เชื่อมต่อฐานข้อมูลไม่ได้", `📡`);
             }
+            if (cb) cb();
         }).gsGetDashboardData(u.empId);
     }
 
+    // 🎨 ฟังก์ชันวาดข้อมูลลงหน้าจอ (แก้ปัญหา 80% ที่หายไป)
+    function updateDashboardUI() {
+        if (!dashboardData) return;
+        
+        // อัปเดตแต้มบนบัตร
+        const cp = document.getElementById('cardTotalPts'); if(cp) cp.innerText = dashboardData.myTotalPoints || 0;
+        const rp = document.getElementById('rewardsAvailablePts'); if(rp) rp.innerText = dashboardData.myTotalPoints || 0;
+        
+        // อัปเดตป้ายเดือน
+        if (dashboardData.currentMonthIndex !== undefined) {
+            const l = document.getElementById('currentMonthLabelHof');
+            if (l) l.innerText = thaiMonths[dashboardData.currentMonthIndex] || '';
+        }
+
+        // อัปเดตโควต้า
+        if (dashboardData.remainingQuota !== undefined) {
+            currentRemainingQuota = dashboardData.remainingQuota;
+            const q = document.getElementById('quotaDisplay');
+            if (q) q.innerText = `${currentRemainingQuota}/${dashboardData.dailyLimit || 3}`;
+            validatePraiseForm();
+        }
+        
+        // 🚀 เรียก 3 ฟังก์ชันนี้กลับมาวาดข้อมูล (นี่แหละตัวการที่หายไป!)
+        try { renderPraises(); } catch(e){ console.error(e); }
+        try { renderHallOfFame(); } catch(e){ console.error(e); }
+        try { renderNews(); } catch(e){ console.error(e); }
+        
+        checkSpecialCampaign();
+    }
+
     function openProfile() {
-        const u=getSession(); if(!u)return;
-        document.getElementById('editIntPhone').value=u.intPhone; document.getElementById('editMobilePhone').value=u.mobilePhone; document.getElementById('editEmail').value=u.email;
-        document.getElementById('editAvatarPreview').src=u.avatar||DEFAULT_AVATAR;
-        updateLineStatusUI();
-        document.getElementById('screen-profile').classList.add('active');
+        try { const u=getSession();
+            if(!u)return;
+            document.getElementById('editIntPhone').value=u.intPhone&&u.intPhone!=='-'?u.intPhone:'';document.getElementById('editMobilePhone').value=u.mobilePhone&&u.mobilePhone!=='-'?u.mobilePhone:'';document.getElementById('editEmail').value=u.email&&u.email!=='-'?u.email:'';uploadImgBase64=null;
+            let tp=dashboardData.myTotalPoints||0, tm=dashboardData.myThemePtsMap||{}; document.getElementById('profileTotalPts').innerText=tp;
+            let tn="Silver Member",tc="bg-slate-300 text-slate-800",rc="border-slate-200";
+            if(tp>=201){tn="Platinum Member";tc="bg-gradient-to-r from-slate-700 to-slate-900 text-slate-100";rc="border-slate-800";}else if(tp>=51){tn="Gold Member";tc="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white";rc="border-yellow-400";}
+            const vb=document.getElementById('vipBadge');if(vb){vb.className=`absolute -bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-1.5 rounded-full text-[10px] font-bold shadow-md whitespace-nowrap z-20 border border-white tracking-widest ${tc}`;vb.innerText=tn;}
+            const ap=document.getElementById('editAvatarPreview');if(ap){ap.src=u.avatar||DEFAULT_AVATAR;ap.className=`w-28 h-28 rounded-full object-cover border-[4px] shadow-lg relative z-10 bg-slate-100 ${rc}`;}
+            const mc=document.getElementById('profileThemePts');if(mc){mc.innerHTML='';if(tp===0){mc.innerHTML=getEmptyStateHTML("ยังไม่มีคะแนน... ร่วมกิจกรรมเพื่ออัปเกรดระดับเลย!",`<svg class="w-10 h-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>`);}else{const clrs=['bg-blue-500','bg-emerald-500','bg-amber-500','bg-rose-500','bg-purple-500'];let ci=0;for(let t in tm){let p=tm[t],pc=tp>0?Math.round((p/tp)*100):0,bc=clrs[ci%clrs.length];ci++;mc.innerHTML+=`<div><div class="flex justify-between text-[11px] mb-1.5 font-medium"><span class="text-slate-700">${t}</span><span class="text-slate-900 font-bold">${p} pts <span class="text-slate-400 font-normal">(${pc}%)</span></span></div><div class="w-full bg-slate-100 rounded-full h-2"><div class="${bc} h-2 rounded-full transition-all duration-1000" style="width: ${pc}%"></div></div></div>`;}}}
+            document.getElementById('navBtnHome').classList.replace('text-blue-600','text-slate-400');document.getElementById('navBtnProfile').classList.replace('text-slate-400','text-blue-600');
+            document.getElementById('screen-profile').classList.add('active');
+        } catch(e){}
     }
 
     function closeProfile() { document.getElementById('screen-profile').classList.remove('active'); }
@@ -478,182 +629,290 @@
     }
 
     async function saveProfile() {
-        try { 
-            const u=getSession();if(!u)return; showLoader();
+        try { const u=getSession();if(!u)return;const b=document.getElementById('btnSaveText');if(b)b.innerText='กำลังอัปโหลด...';showLoader();
             const ud={intPhone:document.getElementById('editIntPhone').value,mobilePhone:document.getElementById('editMobilePhone').value,email:document.getElementById('editEmail').value};
-            if(uploadImgBase64){
-                const bd=uploadImgBase64.split(',')[1];const fd=new FormData();fd.append('image',bd);
-                const r=await fetch('https://api.imgbb.com/1/upload?key='+IMGBB_API_KEY,{method:'POST',body:fd});
-                const d=await r.json();if(d.success)ud.avatarUrl=d.data.url;
-            }
-            google.script.run.withSuccessHandler(r=>{
-                hideLoader();
-                if(r&&r.status==='success'){saveSession(r.userData);renderDashboardInfo(r.userData);closeProfile();showToast('บันทึกสำเร็จ','success');}
-            }).gsUpdateProfile(u.empId,ud);
+            if(uploadImgBase64){try{const bd=uploadImgBase64.split(',')[1];const fd=new FormData();fd.append('image',bd);const r=await fetch('https://api.imgbb.com/1/upload?key='+IMGBB_API_KEY,{method:'POST',body:fd});const d=await r.json();if(d.success)ud.avatarUrl=d.data.url;}catch(e){hideLoader();showToast('อัปโหลดรูปล้มเหลว','error');if(b)b.innerText='บันทึกข้อมูล';return;}}
+            google.script.run.withSuccessHandler(r=>{hideLoader();if(b)b.innerText='บันทึกข้อมูล';if(r&&r.status==='success'){saveSession(r.userData);renderDashboardInfo(r.userData);closeProfile();fetchDashboardData();showToast('บันทึกสำเร็จ','success');}else{showToast(r?r.message:'Error','error');}}).withFailureHandler(e=>{hideLoader();showToast('บันทึกไม่สำเร็จ','error');if(b)b.innerText='บันทึกข้อมูล';}).gsUpdateProfile(u.empId,ud);
         } catch(e){hideLoader();}
     }
 
-    function updateLineStatusUI() {
-        const u = getSession(); if(!u) return;
-        const txt = document.getElementById('lineStatusText'); const btnC = document.getElementById('btnConnectLine'); const btnU = document.getElementById('btnUnlinkLine');
-        if (u.lineId && u.lineId !== '-' && u.lineId !== '') { txt.innerText = 'เชื่อมต่อแล้ว'; txt.className = 'text-[10px] text-[#00B900] font-bold'; btnC.classList.add('hidden'); btnU.classList.remove('hidden'); } 
-        else { txt.innerText = 'ยังไม่ได้เชื่อมต่อ'; txt.className = 'text-[10px] text-slate-500'; btnC.classList.remove('hidden'); btnU.classList.add('hidden'); }
+    function renderPraises() {
+        const w=document.getElementById('praiseBoxWrapper');if(!w)return;
+        if(!dashboardData.praises||dashboardData.praises.length===0){w.innerHTML=getEmptyStateHTML("ยังไม่มีคำชื่นชม...",`💬`);w.classList.remove('hidden');return;}
+        w.classList.remove('hidden');w.innerHTML=`<div class="quote-mark-bg">"</div><div id="praiseBoxContent" class="relative z-10 w-full flex flex-col"></div>`;
+        showNextPraise();clearInterval(praiseInterval);praiseInterval=setInterval(showNextPraise,8000);
     }
 
-    function connectLine() {
-        const u = getSession(); if(!u) return;
-        const lineAuthUrl = "https://liff.line.me/YOUR_LIFF_ID?empId=" + u.empId; 
-        Swal.fire({ title: 'เชื่อมต่อ LINE', text: 'ระบบจะเปิดหน้าต่างใหม่เพื่อเชื่อมต่อ LINE', icon: 'info', showCancelButton: true, confirmButtonText: 'เชื่อมต่อเลย' }).then((result) => { if (result.isConfirmed) { window.open(lineAuthUrl, '_blank'); } });
+    function showNextPraise() {
+        try { if(!dashboardData.praises||dashboardData.praises.length===0)return;const p=dashboardData.praises[currentPraiseIdx];if(!p)return;
+            const m=maskEmpInfo(p.empId,p.firstName,p.lastName);const sm=escapeHTML(p.msg);const sa=p.avatar||DEFAULT_AVATAR;const bx=document.getElementById('praiseBoxContent');if(!bx)return;
+            bx.innerHTML=`<div class="flex items-center justify-between mb-3 fade-in-up"><div class="flex items-center gap-3"><img src="${sa}" onerror="this.src='${DEFAULT_AVATAR}'" class="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover bg-slate-100"><div><p class="text-[12px] font-bold text-slate-800 tracking-wide">${m.name}</p><p class="text-[10px] text-slate-400 font-mono">${m.id}</p></div></div><span class="text-[10px] bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-full font-bold shadow-sm whitespace-nowrap">${p.theme||'-'}</span></div><p class="text-[14px] text-slate-700 font-medium italic leading-relaxed fade-in-up">"${sm}"</p>`;
+            currentPraiseIdx=(currentPraiseIdx+1)%dashboardData.praises.length;
+        } catch(e){}
     }
 
-    function unlinkLine() {
-        const u = getSession(); if(!u) return;
-        showLoader();
-        google.script.run.withSuccessHandler(r => { hideLoader(); if(r.status === 'success') { u.lineId = ''; saveSession(u); updateLineStatusUI(); showToast('ยกเลิกสำเร็จ'); } }).gsUnlinkLine(u.empId);
+    function switchHofTab(t) {
+        haptic('light');currentHofTab=t;const ba=document.getElementById('btnHofAllTime'),bm=document.getElementById('btnHofMonthly'),c=document.getElementById('dynamicHofContainer');if(!c)return;
+        c.style.opacity='0';setTimeout(()=>{if(t==='allTime'){if(ba)ba.className='px-3.5 py-1.5 rounded-full bg-white text-blue-600 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all';if(bm)bm.className='px-3.5 py-1.5 rounded-full text-slate-400 hover:text-slate-600 transition-all';}else{if(bm)bm.className='px-3.5 py-1.5 rounded-full bg-white text-rose-500 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all';if(ba)ba.className='px-3.5 py-1.5 rounded-full text-slate-400 hover:text-slate-600 transition-all';}renderHallOfFame();c.style.opacity='1';},150);
     }
 
-    function checkSpecialCampaign() {
-        const u = getSession(); if (!u) return;
-        google.script.run.withSuccessHandler(r => {
-            const block = document.getElementById('rewardJackpotBlock'); const banner = document.getElementById('promoWinnerBanner');
-            if (r.status !== 'success' || r.isCampaignActive === false) { block.classList.add('hidden'); banner.classList.add('hidden'); return; }
-            if (r.winnerId && r.winnerId !== '') { block.classList.add('hidden'); banner.classList.remove('hidden'); document.getElementById('winnerBannerName').innerText = r.winnerName; document.getElementById('winnerBannerContact').innerText = r.contactName; return; }
-            block.classList.remove('hidden'); banner.classList.add('hidden');
-            let count = r.currentCount || 0; let max = r.maxQuota || 50;
-            let percent = (count / max) * 100;
-            document.getElementById('rewardProgressBar').style.width = percent + '%';
-            
-            const progressText = document.getElementById('rewardProgressText');
-            if (r.isEligible) {
-                progressText.innerText = "🎉 คุณได้สิทธิ์ลุ้นรางวัลแล้ว รอลุ้นผลได้เลย!";
-                progressText.className = "text-[10px] font-bold mt-1 block text-green-600";
-            } else if (count >= max) {
-                progressText.innerText = `โควต้า ${max} คนเต็มแล้ว 😭 รอลุ้นใหม่รอบหน้านะ!`;
-                progressText.className = "text-[10px] font-bold mt-1 block text-rose-500";
-            } else {
-                let remain = max - count;
-                progressText.innerText = `🔥 รีบหน่อย! โควต้าเหลืออีกแค่ ${remain} ที่!`;
-                progressText.className = "text-[10px] text-blue-600 font-medium mt-1 block";
-            }
-        }).gsGetActivePromotionStatus(u.empId);
+    function renderHallOfFame() {
+        const c=document.getElementById('dynamicHofContainer');if(!c)return;const d=(currentHofTab==='allTime'?dashboardData.allTimeHoF:dashboardData.monthlyHoF)||[];
+        if(d.length===0){c.className="flex overflow-x-auto pb-4 snap-x w-full";c.innerHTML=getEmptyStateHTML("ยังรอผู้กล้ามาครอบครองตำแหน่ง",`🏆`);return;}
+        c.className="flex overflow-x-auto gap-4 pb-4 snap-x px-1 pt-1 transition-opacity duration-300";
+        const rs=[{badge:'bg-gradient-to-br from-yellow-300 to-yellow-600 border-white',border:'from-yellow-300 to-yellow-500',glow:'from-yellow-300 to-yellow-600',ptsText:'from-yellow-500 to-yellow-700',label:'1'},{badge:'bg-gradient-to-br from-slate-300 to-slate-500 border-white',border:'from-slate-300 to-slate-400',glow:'from-slate-300 to-slate-500',ptsText:'from-slate-500 to-slate-700',label:'2'},{badge:'bg-gradient-to-br from-orange-300 to-orange-600 border-white',border:'from-orange-300 to-orange-500',glow:'from-orange-300 to-orange-600',ptsText:'from-orange-600 to-orange-800',label:'3'}];
+        let html='';d.forEach((h,i)=>{const m=maskEmpInfo(h.id,h.firstName,h.lastName);const s=rs[i]||rs[2];const sa=h.avatar||DEFAULT_AVATAR;html+=`<div class="snap-center shrink-0 w-[140px] bg-white rounded-[1.5rem] p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col items-center relative overflow-hidden group hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all"><div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${s.border}"></div><div class="absolute top-3 left-3 w-6 h-6 rounded-full flex items-center justify-center font-black text-white shadow-md ${s.badge} text-[11px] border-2 tracking-tighter">${s.label}</div><div class="relative mt-3 mb-3"><div class="absolute inset-0 bg-gradient-to-tr ${s.glow} rounded-full blur-[6px] opacity-60"></div><img src="${sa}" onerror="this.src='${DEFAULT_AVATAR}'" class="relative w-14 h-14 rounded-full object-cover border-[3px] border-white shadow-sm bg-slate-100"></div><p class="text-[12px] font-bold text-slate-800 text-center w-full truncate mb-0.5">${m.name}</p><p class="text-[10px] text-slate-400 font-mono text-center tracking-wider mb-3">${m.id}</p><div class="mt-auto w-full bg-slate-50 py-1.5 rounded-[0.6rem] text-center border border-slate-100/50"><span class="text-[15px] font-black bg-clip-text text-transparent bg-gradient-to-r ${s.ptsText}">${h.points||0}</span><span class="text-[8px] text-slate-400 font-bold ml-0.5 tracking-wider uppercase">PTS</span></div></div>`;});c.innerHTML=html;
     }
 
-    // --- Praise & Send ---
+    function renderNews() {
+        const c=document.getElementById('newsContainer');if(!c)return;if(!dashboardData.news||dashboardData.news.length===0){c.innerHTML=getEmptyStateHTML("ยังไม่มีข่าวสารอัปเดต",`📰`);return;}
+        let html='';dashboardData.news.forEach((n,i)=>{const sa=n.image||DEFAULT_AVATAR;html+=`<div onclick="openNews(${i})" class="snap-center shrink-0 w-[240px] bg-white rounded-[1.2rem] overflow-hidden shadow-sm border border-slate-100 relative cursor-pointer active:scale-95 transition-transform"><img src="${sa}" onerror="this.src='${DEFAULT_AVATAR}'" class="w-full h-32 object-cover bg-slate-100"><div class="p-4"><span class="bg-[#ef4444] text-white text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase">${n.category||'NEWS'}</span><h4 class="text-sm font-bold text-slate-800 mt-2 line-clamp-2">${escapeHTML(n.title)}</h4></div></div>`;});c.innerHTML=html;
+    }
+    function openNews(idx) { const n=dashboardData.news[idx];if(!n)return;document.getElementById('modalNewsImg').src=n.image||DEFAULT_AVATAR;document.getElementById('modalNewsCat').innerText=n.category||'NEWS';document.getElementById('modalNewsTitle').innerText=n.title||'';document.getElementById('modalNewsContent').innerHTML=n.content||'';document.getElementById('newsModal').classList.remove('hidden'); }
+    function closeNewsModal() { document.getElementById('newsModal').classList.add('hidden');
+    }
+
+    function openPraise() { document.getElementById('praiseOverlay').classList.add('active');document.getElementById('screen-praise').classList.add('active');switchPraiseTab('send',0);if(allEmployees.length===0)fetchPraiseData(); }
+    function closePraise() { document.getElementById('praiseOverlay').classList.remove('active');document.getElementById('screen-praise').classList.remove('active');
+    }
+    function switchPraiseTab(t,i) { haptic('light');document.getElementById('tabIndicator').style.transform=`translateX(${i*100}%)`;const ts=document.getElementById('tabSend'),ti=document.getElementById('tabInbox');if(t==='send'){document.getElementById('praiseTabSend').classList.remove('hidden');document.getElementById('praiseTabInbox').classList.add('hidden');if(ts)ts.classList.replace('text-slate-400','text-blue-600');if(ti)ti.classList.replace('text-blue-600','text-slate-400');}else{document.getElementById('praiseTabSend').classList.add('hidden');document.getElementById('praiseTabInbox').classList.remove('hidden');if(ti)ti.classList.replace('text-slate-400','text-blue-600');if(ts)ts.classList.replace('text-blue-600','text-slate-400');} }
+    function filterEmp() { const txt=document.getElementById('searchEmp').value.toLowerCase().trim();const dp=document.getElementById('empDropdown');if(!dp)return;dp.innerHTML='';if(!txt){dp.classList.add('hidden');return;}const u=getSession()||{empId:''};const f=allEmployees.filter(e=>(String(e.id).toLowerCase().includes(txt)||String(e.name).toLowerCase().includes(txt))&&String(e.id)!==String(u.empId)).slice(0,5);if(f.length===0){dp.innerHTML='<div class="p-4 text-sm text-slate-500 text-center">ไม่พบพนักงานที่ค้นหา</div>';}else{f.forEach(e=>{const d=document.createElement('div');d.className='p-3 hover:bg-slate-50 cursor-pointer flex items-center space-x-3 border-b border-slate-100 last:border-0';d.innerHTML=`<img src="${e.avatar||DEFAULT_AVATAR}" class="w-8 h-8 rounded-full object-cover bg-slate-100"><div><p class="text-sm font-bold text-slate-800">${e.name}</p><p class="text-[10px] text-slate-500">${e.id}</p></div>`;d.onclick=()=>{selectEmp(e);haptic('light');};dp.appendChild(d);});}dp.classList.remove('hidden');
+    }
+    function selectEmp(e) { selectedReceiverId=e.id;document.getElementById('searchEmpWrapper').classList.add('hidden');document.getElementById('empDropdown').classList.add('hidden');document.getElementById('selEmpName').innerText=e.name;document.getElementById('selEmpId').innerText=e.id;const a=document.getElementById('selEmpAvatar');if(a)a.src=e.avatar||DEFAULT_AVATAR;document.getElementById('selectedEmpCard').classList.remove('hidden');document.getElementById('selectedEmpCard').classList.add('flex');validatePraiseForm(); }
+    function clearSelectedEmp() { selectedReceiverId=null;document.getElementById('selectedEmpCard').classList.add('hidden');document.getElementById('selectedEmpCard').classList.remove('flex');document.getElementById('searchEmp').value='';document.getElementById('searchEmpWrapper').classList.remove('hidden');validatePraiseForm();
+    }
+    function renderThemes(t) { const c=document.getElementById('themeContainer');if(!c)return;c.innerHTML='';if(!t||t.length===0)return;t.forEach(th=>{const b=document.createElement('button');b.type='button';b.className='theme-pill';b.id='theme-'+th.id;b.innerHTML=`<span class="text-lg leading-none">${th.icon||'🌟'}</span><span>${th.name}</span>`;b.onclick=()=>{selectTheme(th);haptic('light');};c.appendChild(b);});
+    }
+    function selectTheme(t) { selectedTheme=t;document.querySelectorAll('.theme-pill').forEach(b=>b.classList.remove('active'));const s=document.getElementById('theme-'+t.id);if(s)s.classList.add('active');validatePraiseForm(); }
+    function addEmoji(e) { const el=document.getElementById('praiseMsg');if(el){el.value+=e;validatePraiseForm();} } document.getElementById('praiseMsg').addEventListener('input',validatePraiseForm);
+    function validatePraiseForm() { const m=document.getElementById('praiseMsg').value.trim();const b=document.getElementById('btnSubmitPraise');if(!b)return;const bt=document.getElementById('btnSubmitText');if(selectedReceiverId&&selectedTheme&&m.length>0&&currentRemainingQuota>0){b.disabled=false;if(bt)bt.innerText='ส่งคำชื่นชม';}else{b.disabled=true;if(currentRemainingQuota<=0){if(bt)bt.innerText='โควต้าวันนี้หมดแล้ว';}else{if(bt)bt.innerText='ส่งคำชื่นชม';}} }
+    
+    function doSubmitPraise() { 
+        try{
+            haptic('light');const m=document.getElementById('praiseMsg').value.trim();const u=getSession();if(!u)return;
+            const b=document.getElementById('btnSubmitText');if(b)b.innerText='กำลังส่ง...';showLoader();
+            google.script.run.withSuccessHandler(r=>{
+                hideLoader();
+                if(r&&r.status==='success'){
+                    showToast('ส่งสำเร็จ!','success');shootConfetti();
+                    if(r.remainingQuota!==undefined){currentRemainingQuota=r.remainingQuota;const q=document.getElementById('quotaDisplay');if(q)q.innerText=`${currentRemainingQuota}/${dashboardData.dailyLimit||3}`;}
+                    setTimeout(()=>{
+                        closePraise();clearSelectedEmp();selectedTheme=null;document.querySelectorAll('.theme-pill').forEach(x=>x.classList.remove('active'));document.getElementById('praiseMsg').value='';
+                        fetchDashboardData();
+                        checkSpecialCampaign();
+                    },1500);
+                }else{showToast(r?r.message:'เกิดข้อผิดพลาด','error');validatePraiseForm();}
+            }).withFailureHandler(e=>{hideLoader();showToast('เชื่อมต่อล้มเหลว','error');validatePraiseForm();}).gsSubmitPraise(u.empId,selectedReceiverId,m,selectedTheme.name,selectedTheme.points);
+        }catch(e){hideLoader();validatePraiseForm();} 
+    }
+
     function fetchPraiseData() { 
         google.script.run.withSuccessHandler(r=>{if(r&&r.status==='success')allEmployees=r.data||[];}).gsGetEmployeeList();
         google.script.run.withSuccessHandler(r=>{if(r&&r.status==='success')renderThemes(r.data||[]);}).gsGetThemes();
     }
     
-    function openPraise() { document.getElementById('praiseOverlay').classList.add('active');document.getElementById('screen-praise').classList.add('active');switchPraiseTab('send',0);if(allEmployees.length===0)fetchPraiseData(); }
-    
-    function switchPraiseTab(t,i) { 
-        const ts=document.getElementById('tabSend'),ti=document.getElementById('tabInbox');
-        if(t==='send'){
-            document.getElementById('praiseTabSend').classList.remove('hidden');document.getElementById('praiseTabInbox').classList.add('hidden');
-            ts.classList.replace('text-slate-400','text-blue-600');ti.classList.replace('text-blue-600','text-slate-400');
-        }else{
-            document.getElementById('praiseTabSend').classList.add('hidden');document.getElementById('praiseTabInbox').classList.remove('hidden');
-            ti.classList.replace('text-slate-400','text-blue-600');ts.classList.replace('text-blue-600','text-slate-400');
-        } 
+    function startInboxSync() { syncInbox();inboxSyncTimer=setInterval(syncInbox,15000);
     }
-
-    function filterEmp() { 
-        const txt=document.getElementById('searchEmp').value.toLowerCase().trim();const dp=document.getElementById('empDropdown');if(!dp)return;
-        dp.innerHTML='';if(!txt){dp.classList.add('hidden');return;}
-        const u=getSession()||{empId:''};
-        const f=allEmployees.filter(e=>(String(e.id).toLowerCase().includes(txt)||String(e.name).toLowerCase().includes(txt))&&String(e.id)!==String(u.empId)).slice(0,5);
-        if(f.length===0){dp.innerHTML='<div class="p-4 text-sm text-slate-500 text-center">ไม่พบพนักงาน</div>';}
-        else{f.forEach(e=>{const d=document.createElement('div');d.className='p-3 hover:bg-slate-50 cursor-pointer flex items-center space-x-3 border-b border-slate-100';d.innerHTML=`<img src="${e.avatar||DEFAULT_AVATAR}" class="w-8 h-8 rounded-full object-cover"><div><p class="text-sm font-bold">${e.name}</p><p class="text-[10px] text-slate-500">${e.id}</p></div>`;d.onclick=()=>{selectEmp(e);};dp.appendChild(d);});}
-        dp.classList.remove('hidden');
-    }
-
-    function selectEmp(e) { 
-        selectedReceiverId=e.id; document.getElementById('searchEmp').classList.add('hidden'); document.getElementById('empDropdown').classList.add('hidden');
-        document.getElementById('selEmpName').innerText=e.name; document.getElementById('selEmpAvatar').src=e.avatar||DEFAULT_AVATAR;
-        document.getElementById('selectedEmpCard').classList.remove('hidden'); document.getElementById('selectedEmpCard').classList.add('flex');
-        validatePraiseForm(); 
-    }
-
-    function clearSelectedEmp() { 
-        selectedReceiverId=null; document.getElementById('selectedEmpCard').classList.add('hidden'); document.getElementById('selectedEmpCard').classList.remove('flex');
-        document.getElementById('searchEmp').value=''; document.getElementById('searchEmp').classList.remove('hidden');
-        validatePraiseForm();
-    }
-
-    function renderThemes(t) { 
-        const c=document.getElementById('themeContainer');if(!c)return;c.innerHTML='';if(!t||t.length===0)return;
-        t.forEach(th=>{const b=document.createElement('button');b.type='button';b.className='px-3 py-1.5 border rounded-full text-sm hover:bg-blue-50';b.id='theme-'+th.id;b.innerText=th.name;b.onclick=()=>{selectTheme(th);};c.appendChild(b);});
-    }
-
-    function selectTheme(t) { 
-        selectedTheme=t; document.querySelectorAll('#themeContainer button').forEach(b=>b.classList.remove('bg-blue-600','text-white'));
-        const s=document.getElementById('theme-'+t.id);if(s)s.classList.add('bg-blue-600','text-white'); validatePraiseForm(); 
-    }
-
-    function validatePraiseForm() { 
-        const m=document.getElementById('praiseMsg').value.trim(); const b=document.getElementById('btnSubmitPraise'); if(!b)return;
-        if(selectedReceiverId&&selectedTheme&&m.length>0){b.disabled=false;}else{b.disabled=true;} 
-    }
-    document.getElementById('praiseMsg').addEventListener('input',validatePraiseForm);
-
-    function doSubmitPraise() { 
-        try{
-            const m=document.getElementById('praiseMsg').value.trim();const u=getSession();if(!u)return;
-            showLoader();
+    function syncInbox() { 
+        try {
+            const u=getSession();if(!u)return;
             google.script.run.withSuccessHandler(r=>{
-                hideLoader();
-                if(r&&r.status==='success'){
-                    showToast('ส่งสำเร็จ!','success'); shootConfetti();
-                    setTimeout(()=>{ closePraise();clearSelectedEmp();selectedTheme=null;document.getElementById('praiseMsg').value=''; fetchDashboardData(); },1500);
-                }else{showToast(r?r.message:'เกิดข้อผิดพลาด','error');}
-            }).gsSubmitPraise(u.empId,selectedReceiverId,m,selectedTheme.name,selectedTheme.points);
-        }catch(e){hideLoader();} 
+                if(r && r.status === 'success'){
+                    inboxData = r.data || [];
+                    updateInboxUI(r.unreadCount || 0); 
+                }
+            }).gsGetMyInbox(u.empId);
+        } catch(e){} 
     }
-
-    // --- Rewards ---
-    function openRewards() { switchScreen('screen-rewards'); fetchRewards(); }
     
+    function updateInboxUI(unreadCount) { 
+        const c=document.getElementById('praiseInboxList'), mb=document.getElementById('navNotiBadge'), tb=document.getElementById('inboxNotiBadge');
+        if(!c) return;
+        
+        if(unreadCount > 0){
+            if(mb) mb.classList.remove('hidden');
+            if(tb) tb.classList.remove('hidden');
+            if(!hasShownWelcomeAlert && document.getElementById('screen-dashboard').classList.contains('active')) {
+                Swal.fire({
+                    title: 'ข้อความใหม่! 💌',
+                    text: `คุณมี ${unreadCount} คำชื่นชมที่ยังไม่ได้กดรับแต้ม ไปดูเลยไหม?`,
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'ไปดูเลย!',
+                    cancelButtonText: 'ไว้ทีหลัง',
+                    confirmButtonColor: '#3b82f6',
+                    customClass: { popup: 'rounded-2xl' }
+                }).then((result) => {
+                    if (result.isConfirmed) { openPraise(); switchPraiseTab('inbox', 1); }
+                });
+                hasShownWelcomeAlert = true; 
+            }
+        }else{
+            if(mb) mb.classList.add('hidden');
+            if(tb) tb.classList.add('hidden');
+        }
+        
+        if(inboxData.length === 0){ c.innerHTML=getEmptyStateHTML("กล่องข้อความว่างเปล่า...",`📩`);
+            return; }
+        
+        let html='';
+        inboxData.forEach(p => {
+            let hp = Math.ceil((parseInt(p.points)||0)/2);
+            const sm = escapeHTML(p.msg);
+            const sa = p.senderAvatar||DEFAULT_AVATAR;
+            html += `<div id="inbox-card-${p.praiseId}" class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col gap-2"><div class="flex justify-between items-center"><div class="flex items-center gap-2"><img src="${sa}" onerror="this.src='${DEFAULT_AVATAR}'" class="w-8 h-8 rounded-full border bg-slate-100"><span class="text-sm font-bold text-slate-800">${p.senderName||'Unknown'}</span></div><span class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-full font-bold">${p.theme||'-'}</span></div><p class="text-[13px] text-slate-600 italic py-2">"${sm}"</p><button onclick="likeReceivedPraise('${p.praiseId}',${hp})" class="w-full mt-1 flex justify-center gap-2 bg-rose-50 text-rose-500 py-2.5 rounded-xl text-sm font-bold hover:bg-rose-100 transition">❤️ กดถูกใจรับ ${hp} PTS</button></div>`;
+        });
+        c.innerHTML = html;
+    }
+    
+    function likeReceivedPraise(id,pts) { try{haptic('light');const u=getSession();if(!u)return;const c=document.getElementById('inbox-card-'+id);if(!c)return;const b=c.querySelector('button');if(b){b.innerHTML='ประมวลผล...';b.disabled=true;b.classList.replace('bg-rose-50','bg-slate-100');b.classList.replace('text-rose-500','text-slate-400');}showLoader();google.script.run.withSuccessHandler(r=>{hideLoader();if(r&&r.status==='success'){if(b){b.innerHTML='✅ รับคะแนนเรียบร้อย!';b.classList.replace('bg-slate-100','bg-green-50');b.classList.replace('text-slate-400','text-green-600');}showToast(`ได้รับ ${pts} PTS!`,'success');shootConfetti();setTimeout(()=>{c.style.opacity='0';setTimeout(()=>{syncInbox();fetchDashboardData();},300);},1000);}else{showToast(r?r.message:'Error','error');syncInbox();}}).withFailureHandler(e=>{hideLoader();showToast('ล้มเหลว','error');syncInbox();}).gsLikePraise(id,u.empId);}catch(e){hideLoader();} }
+
+    function openRewards() { switchScreen('screen-rewards');
+        fetchRewards(); }
     function fetchRewards() {
-        const c = document.getElementById('rewardsContainer'); c.innerHTML = '<div class="col-span-2 text-center py-8">กำลังโหลด...</div>';
+        const c = document.getElementById('rewardsContainer');
+        c.innerHTML = '<div class="col-span-2 text-center py-8 text-slate-400"><div class="spinner mx-auto mb-2 border-blue-500"></div>กำลังโหลดของรางวัล...</div>';
         const u = getSession(); if(!u) return;
         google.script.run.withSuccessHandler(r => { 
-            if(r && r.status === 'success'){ rewardsList = r.data || []; renderRewards(); } 
+            if(r && r.status === 'success'){
+                rewardsList = r.data || [];
+                renderRewards();
+            } else {
+                c.innerHTML = `<div class="col-span-2">${getEmptyStateHTML(r ? r.message : "โหลดไม่สำเร็จ โปรดลองใหม่","❌")}</div>`;
+            } 
+        }).withFailureHandler(e => {
+            c.innerHTML = `<div class="col-span-2">${getEmptyStateHTML("เชื่อมต่อเซิร์ฟเวอร์ล้มเหลว: " + e.message,"📡")}</div>`;
         }).gsGetRewards(u.empId);
     }
     
     function renderRewards() {
-        const c=document.getElementById('rewardsContainer'); c.innerHTML='';
-        if(rewardsList.length===0){c.innerHTML=`<div class="col-span-2 text-center py-8">ไม่มีของรางวัล</div>`;return;}
+        const c=document.getElementById('rewardsContainer');
+        c.innerHTML='';
+        if(rewardsList.length===0){c.innerHTML=`<div class="col-span-2">${getEmptyStateHTML("ยังไม่มีของรางวัลเปิดให้แลกในขณะนี้","🎁")}</div>`;return;}
         rewardsList.forEach((r,i)=>{
             const out=r.stock<=0; const sa=r.image||DEFAULT_AVATAR;
-            c.innerHTML+=`<div onclick="${out?'':`showRewardModal(${i})`}" class="bg-white rounded-2xl overflow-hidden shadow-sm border ${out?'opacity-60 cursor-not-allowed':'cursor-pointer'}"><img src="${sa}" class="w-full h-32 object-cover"><div class="p-3"><h4 class="text-xs font-bold truncate">${escapeHTML(r.title)}</h4><div class="mt-2 flex justify-between"><span class="text-sm font-black text-amber-600">${r.points} PTS</span><span class="text-[9px] text-slate-400">เหลือ ${r.stock}</span></div></div></div>`;
+            c.innerHTML+=`<div onclick="${out?'':`showRewardModal(${i})`}" class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 ${out?'opacity-60 cursor-not-allowed':'cursor-pointer active:scale-95'} transition flex flex-col"><div class="relative w-full aspect-square bg-slate-100"><img src="${sa}" class="w-full h-full object-cover">${out?'<div class="absolute inset-0 bg-black/40 flex items-center justify-center"><span class="bg-rose-500 text-white font-bold text-[10px] px-2 py-1 rounded">OUT OF STOCK</span></div>':''}</div><div class="p-3 flex-1 flex flex-col"><h4 class="text-xs font-bold text-slate-800 line-clamp-2 leading-tight flex-1">${escapeHTML(r.title)}</h4><div class="mt-2 flex items-center justify-between"><span class="text-sm font-black text-amber-600">${r.points} <span class="text-[9px] font-normal">PTS</span></span><span class="text-[9px] text-slate-400">เหลือ ${r.stock}</span></div></div></div>`;
         });
     }
-
+    
     function showRewardModal(i) {
-        activeRewardObj=rewardsList[i]; if(!activeRewardObj)return;
+        activeRewardObj=rewardsList[i];
+        if(!activeRewardObj)return;
         document.getElementById('modalRewardImg').src=activeRewardObj.image||DEFAULT_AVATAR; document.getElementById('modalRewardTitle').innerText=activeRewardObj.title; document.getElementById('modalRewardDesc').innerHTML=escapeHTML(activeRewardObj.description).replace(/\n/g,'<br>'); document.getElementById('modalRewardPts').innerText=activeRewardObj.points;
+        document.getElementById('modalRewardPts').innerHTML = `${activeRewardObj.points} <span class="text-[10px] font-normal text-slate-500 block mt-1">(คุณมีสิทธิ์แลก: ${activeRewardObj.eligiblePts} PTS)</span>`;
         document.getElementById('rewardModal').classList.remove('hidden');
     }
     
-    function closeRewardModal() { document.getElementById('rewardModal').classList.add('hidden'); activeRewardObj=null; }
-
+    function closeRewardModal() { document.getElementById('rewardModal').classList.add('hidden'); activeRewardObj=null;
+    }
+    
     function confirmRedeem() {
-        if(!activeRewardObj)return; const u=getSession(); if(!u)return;
-        Swal.fire({ title: 'ยืนยันการแลกรางวัล?', text: `ใช้ ${activeRewardObj.points} PTS เพื่อแลก ${activeRewardObj.title}`, icon: 'question', showCancelButton: true, confirmButtonText: 'แลกเลย', customClass: { popup: 'rounded-2xl' }
+        if(!activeRewardObj)return;
+        const u=getSession(); if(!u)return;
+        if(activeRewardObj.eligiblePts < activeRewardObj.points) { showToast('คะแนนสะสมในช่วงเวลาของรางวัลนี้ ไม่เพียงพอครับ', 'error'); return;
+        }
+        
+        Swal.fire({
+            title: 'ยืนยันการแลกรางวัล?',
+            text: `ใช้ ${activeRewardObj.points} PTS เพื่อแลก ${activeRewardObj.title}`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3b82f6',
+            cancelButtonColor: '#cbd5e1',
+            confirmButtonText: 'ยืนยันแลกเลย',
+            cancelButtonText: 'ยกเลิก',
+            customClass: { popup: 'rounded-2xl' }
         }).then((result) => {
             if (result.isConfirmed) {
-                showLoader();
+                const b=document.getElementById('btnConfirmRedeem'); b.innerText='กำลังแลก...'; b.disabled=true; showLoader();
+                
                 google.script.run.withSuccessHandler(r=>{
-                    hideLoader();
-                    if(r&&r.status==='success'){ Swal.fire('สำเร็จ!', r.message, 'success'); shootConfetti(); closeRewardModal(); fetchRewards(); fetchDashboardData(); } 
-                    else { Swal.fire('เกิดข้อผิดพลาด', r?r.message:'Error', 'error'); }
+                    hideLoader(); b.innerText='ยืนยันแลกสิทธิ์'; b.disabled=false;
+                    if(r&&r.status==='success'){ 
+                        Swal.fire({ icon: 'success', title: 'แลกสำเร็จ!', text: r.message, timer: 2000, showConfirmButton: false, customClass: { popup: 'rounded-2xl' } });
+                        shootConfetti(); closeRewardModal(); fetchRewards(); fetchDashboardData(); 
+                    } else { 
+                        Swal.fire('เกิดข้อผิดพลาด', r?r.message:'Error', 'error');
+                    }
+                }).withFailureHandler(e=>{
+                    hideLoader(); b.innerText='ยืนยันแลกสิทธิ์'; b.disabled=false;
+                    Swal.fire('เชื่อมต่อล้มเหลว', 'โปรดตรวจสอบอินเทอร์เน็ต', 'error');
                 }).gsRedeemReward(u.empId, activeRewardObj.id);
             }
         });
     }
 
-    function logout() { clearSession(); location.reload(); }
+    function shootFireworks() {
+        var duration = 3 * 1000;
+        var end = Date.now() + duration;
+        (function frame() {
+            confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#f59e0b','#ef4444','#3b82f6'] });
+            confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#f59e0b','#ef4444','#3b82f6'] });
+            if (Date.now() < end) { requestAnimationFrame(frame); }
+        }());
+    }
+
+    function checkSpecialCampaign() {
+        const u = getSession();
+        if (!u || typeof google === 'undefined') return;
+        
+        google.script.run.withSuccessHandler(r => {
+            const block = document.getElementById('rewardJackpotBlock');
+            const banner = document.getElementById('promoWinnerBanner');
+            if (!block) return;
+            
+            if (r.status !== 'success' || r.isCampaignActive === false) {
+                block.classList.add('hidden'); 
+                if(banner) banner.classList.add('hidden');
+                return;
+            }
+            
+            if (r.winnerId && r.winnerId !== '') {
+                block.classList.add('hidden');
+                if(banner) {
+                    banner.classList.remove('hidden');
+                    document.getElementById('winnerBannerName').innerText = r.winnerName;
+                    let cText = (r.contactName ? r.contactName + " " : "") + (r.contactPhone ? "(โทร: " + r.contactPhone + ")" : "");
+                    document.getElementById('winnerBannerContact').innerText = cText;
+                    
+                    if(r.winnerId === u.empId && !window.hasFiredWinnerConfetti) {
+                        shootFireworks();
+                        window.hasFiredWinnerConfetti = true;
+                    }
+                }
+                return;
+            }
+
+            block.classList.remove('hidden');
+            if(banner) banner.classList.add('hidden');
+            block.querySelector('h3').innerText = r.promoName;
+            block.querySelector('p').innerText = r.promoDesc;
+            
+            const progressBar = document.getElementById('rewardProgressBar');
+            const progressText = document.getElementById('rewardProgressText');
+            let count = r.currentCount || 0;
+            let max = r.maxQuota || 50;
+            if(count > max) count = max;
+            let percent = (count / max) * 100;
+            progressBar.style.width = percent + '%';
+            if (r.isEligible) {
+                progressText.innerText = "🎉 คุณได้สิทธิ์ลุ้นรางวัลแล้ว รอลุ้นผลได้เลย!";
+                progressText.className = "text-[10px] font-bold mt-1 block text-green-600";
+                progressBar.style.background = "linear-gradient(90deg, #10b981 0%, #059669 100%)";
+            } else if (count >= max) {
+                progressText.innerText = `โควต้า ${max} คนเต็มแล้ว 😭 รอลุ้นใหม่รอบหน้านะ!`;
+                progressText.className = "text-[10px] font-bold mt-1 block text-rose-500";
+                progressBar.style.background = "linear-gradient(90deg, #ef4444 0%, #b91c1c 100%)";
+            } else {
+                let remain = max - count;
+                progressText.innerText = `🔥 รีบหน่อย! โควต้าเหลืออีกแค่ ${remain} ที่!`;
+                progressText.className = "text-[10px] text-blue-600 font-medium mt-1 block";
+                progressBar.style.background = "linear-gradient(90deg, #3b82f6 0%, #1e40af 100%)";
+            }
+        }).gsGetActivePromotionStatus(u.empId);
+    }
 </script>
+</body>
+</html>
 </body>
 </html>
