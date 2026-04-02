@@ -8,6 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Bai Jamjuree', sans-serif; background-color: #e2e8f0; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; margin: 0; overflow: hidden; overscroll-behavior-y: none; }
@@ -110,7 +113,7 @@
     <div id="screen-login-step2" class="screen relative bg-slate-50 !p-0">
         <div class="login-bg"><div class="login-blob-top"></div><div class="login-blob-top-2"></div><div class="login-blob-bottom"></div></div>
 
-        <button type="button" onclick="switchScreen('screen-login-step1')" class="absolute top-8 left-6 text-slate-500 hover:text-slate-800 p-2.5 z-20 bg-white/60 backdrop-blur-md rounded-full shadow-sm border border-white">
+        <button type="button" onclick="switchScreen('screen-login-step1'); haptic('light');" class="absolute top-8 left-6 text-slate-500 hover:text-slate-800 p-2.5 z-20 bg-white/60 backdrop-blur-md rounded-full shadow-sm border border-white">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
         </button>
 
@@ -118,7 +121,7 @@
 
         <div class="relative z-10 w-full px-8 pb-16">
             <div class="flex items-center gap-4 mb-8 bg-white/70 backdrop-blur-md p-4 rounded-2xl border border-white shadow-sm">
-                <img id="loginAvatar" src="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23cbd5e1\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" class="w-14 h-14 rounded-full shadow-md object-cover border-2 border-white bg-slate-100">
+                <img id="loginAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23cbd5e1\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" class="w-14 h-14 rounded-full shadow-md object-cover border-2 border-white bg-slate-100">
                 <div>
                     <h2 class="text-[22px] font-black text-slate-800 leading-tight mb-1">สวัสดี,</h2>
                     <p class="text-[16px] font-bold text-blue-600" id="loginName">คุณ...</p>
@@ -186,8 +189,8 @@
                 <p class="text-[12px] text-slate-500 font-semibold tracking-wide" id="txtGreeting">สวัสดีครับ</p>
                 <h1 class="text-[24px] font-bold text-slate-800 leading-tight" id="txtFirstName">ผู้ใช้งาน</h1>
             </div>
-            <div class="relative cursor-pointer" onclick="openProfile()">
-                <img id="imgAvatar" src="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23cbd5e1\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" class="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover bg-slate-200">
+            <div class="relative cursor-pointer" onclick="openProfile(); haptic('light');">
+                <img id="imgAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23cbd5e1\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" class="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover bg-slate-200">
             </div>
         </div>
 
@@ -268,8 +271,8 @@
                         Hall of Fame
                     </h3>
                     <div class="bg-slate-200/60 p-1 rounded-full flex text-[10px] font-bold shadow-inner">
-                        <button type="button" id="btnHofAllTime" onclick="switchHofTab('allTime')" class="px-3.5 py-1.5 rounded-full bg-white text-blue-600 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all">ทั้งหมด</button>
-                        <button type="button" id="btnHofMonthly" onclick="switchHofTab('monthly')" class="px-3.5 py-1.5 rounded-full text-slate-400 hover:text-slate-600 transition-all">เดือน <span id="currentMonthLabelHof">...</span></button>
+                        <button type="button" id="btnHofAllTime" onclick="switchHofTab('allTime'); haptic('light');" class="px-3.5 py-1.5 rounded-full bg-white text-blue-600 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all">ทั้งหมด</button>
+                        <button type="button" id="btnHofMonthly" onclick="switchHofTab('monthly'); haptic('light');" class="px-3.5 py-1.5 rounded-full text-slate-400 hover:text-slate-600 transition-all">เดือน <span id="currentMonthLabelHof">...</span></button>
                     </div>
                 </div>
                 <div id="dynamicHofContainer" class="flex overflow-x-auto gap-4 pb-4 snap-x px-1 pt-1 transition-opacity duration-300"></div>
@@ -306,8 +309,8 @@
         </div>
         <div class="p-6">
             <div class="flex justify-center mb-10 relative">
-                <label class="relative cursor-pointer hover:opacity-90 transition-opacity block">
-                    <img id="editAvatarPreview" src="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23cbd5e1\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" class="w-28 h-28 rounded-full object-cover border-[4px] shadow-lg border-white relative z-10 bg-slate-100">
+                <label class="relative cursor-pointer hover:opacity-90 transition-opacity block" onclick="haptic('light')">
+                    <img id="editAvatarPreview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23cbd5e1\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" class="w-28 h-28 rounded-full object-cover border-[4px] shadow-lg border-white relative z-10 bg-slate-100">
                     <div class="absolute bottom-0 right-0 bg-blue-600 p-2.5 rounded-full text-white border-2 border-white shadow-sm z-20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /></svg>
                     </div>
@@ -342,7 +345,7 @@
                     </div>
                 </div>
 
-                <button type="button" onclick="saveProfile()" class="btn-modern w-full py-3.5 mt-2 text-[14px] rounded-xl"><span id="btnSaveText">บันทึกข้อมูล</span></button>
+                <button type="button" onclick="saveProfile(); haptic('light');" class="btn-modern w-full py-3.5 mt-2 text-[14px] rounded-xl"><span id="btnSaveText">บันทึกข้อมูล</span></button>
             </div>
 
             <div class="mb-4">
@@ -357,7 +360,7 @@
                 </div>
             </div>
 
-            <button type="button" onclick="logout()" class="w-full py-4 mt-8 font-bold text-rose-500 bg-rose-50 border border-rose-100 rounded-xl hover:bg-rose-100 transition-colors flex items-center justify-center gap-2 shadow-sm">
+            <button type="button" onclick="logout(); haptic('heavy');" class="w-full py-4 mt-8 font-bold text-rose-500 bg-rose-50 border border-rose-100 rounded-xl hover:bg-rose-100 transition-colors flex items-center justify-center gap-2 shadow-sm">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                 ออกจากระบบ (LOGOUT)
             </button>
@@ -374,7 +377,7 @@
                 <div id="modalNewsContent" class="text-sm text-slate-600 leading-relaxed mt-4"></div>
             </div>
             <div class="p-4 border-t border-slate-100 bg-slate-50">
-                <button type="button" onclick="closeNewsModal()" class="w-full bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-colors">ปิดหน้าต่าง</button>
+                <button type="button" onclick="closeNewsModal(); haptic('light');" class="w-full bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-colors">ปิดหน้าต่าง</button>
             </div>
         </div>
     </div>
@@ -391,8 +394,8 @@
                 </div>
             </div>
             <div class="p-4 border-t border-slate-100 bg-slate-50 flex gap-3">
-                <button type="button" onclick="closeRewardModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-colors">ยกเลิก</button>
-                <button type="button" id="btnConfirmRedeem" onclick="confirmRedeem()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-sm">ยืนยันแลกสิทธิ์</button>
+                <button type="button" onclick="closeRewardModal(); haptic('light');" class="flex-1 bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-colors">ยกเลิก</button>
+                <button type="button" id="btnConfirmRedeem" onclick="confirmRedeem(); haptic('heavy');" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-sm">ยืนยันแลกสิทธิ์</button>
             </div>
         </div>
     </div>
@@ -402,8 +405,8 @@
         <div class="w-full flex justify-center pt-4 pb-2 cursor-pointer" onclick="goHome()"><div class="w-12 h-1.5 bg-slate-200 rounded-full"></div></div>
         
         <div class="relative flex border-b border-slate-200">
-            <button type="button" onclick="switchPraiseTab('send', 0)" id="tabSend" class="flex-1 py-3.5 text-[14px] font-bold text-blue-600 transition-colors z-10">✍️ เขียนคำชื่นชม</button>
-            <button type="button" onclick="switchPraiseTab('inbox', 1)" id="tabInbox" class="flex-1 py-3.5 text-[14px] font-bold text-slate-400 transition-colors z-10 relative">
+            <button type="button" onclick="switchPraiseTab('send', 0); haptic('light');" id="tabSend" class="flex-1 py-3.5 text-[14px] font-bold text-blue-600 transition-colors z-10">✍️ เขียนคำชื่นชม</button>
+            <button type="button" onclick="switchPraiseTab('inbox', 1); haptic('light');" id="tabInbox" class="flex-1 py-3.5 text-[14px] font-bold text-slate-400 transition-colors z-10 relative">
                 📩 กล่องข้อความ
                 <span id="inboxNotiBadge" class="absolute top-3 right-8 w-2 h-2 bg-red-500 rounded-full hidden"></span>
             </button>
@@ -424,10 +427,10 @@
                 <div id="empDropdown" class="absolute w-full bg-white border border-slate-200 rounded-xl shadow-xl mt-1 max-h-48 overflow-y-auto hidden z-20"></div>
                 <div id="selectedEmpCard" class="hidden mt-3 p-3 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-between transition-all">
                     <div class="flex items-center space-x-3">
-                        <img id="selEmpAvatar" src="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23cbd5e1\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" class="w-10 h-10 rounded-full object-cover border border-white shadow-sm bg-slate-100">
+                        <img id="selEmpAvatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23cbd5e1\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" class="w-10 h-10 rounded-full object-cover border border-white shadow-sm bg-slate-100">
                         <div><p id="selEmpName" class="font-bold text-slate-800 text-sm"></p><p id="selEmpId" class="text-xs text-slate-500"></p></div>
                     </div>
-                    <button type="button" onclick="clearSelectedEmp()" class="text-red-500 text-xs font-semibold px-2 py-1 hover:bg-red-50 rounded">เปลี่ยนคน</button>
+                    <button type="button" onclick="clearSelectedEmp(); haptic('light');" class="text-red-500 text-xs font-semibold px-2 py-1 hover:bg-red-50 rounded">เปลี่ยนคน</button>
                 </div>
             </div>
 
@@ -441,17 +444,17 @@
                 <div class="bg-white border border-slate-200 rounded-xl overflow-hidden focus-within:border-blue-500 transition-colors">
                     <textarea id="praiseMsg" rows="3" class="w-full p-4 outline-none resize-none text-[14px] text-slate-600 placeholder:text-slate-400" placeholder="พิมพ์ความในใจของคุณที่นี่..."></textarea>
                     <div class="bg-white p-2 flex justify-center gap-4 px-4 text-xl snap-x pb-3 border-t border-slate-50">
-                        <button type="button" onclick="addEmoji('👍')" class="snap-center shrink-0 hover:scale-110 transition-transform">👍</button>
-                        <button type="button" onclick="addEmoji('💖')" class="snap-center shrink-0 hover:scale-110 transition-transform">💖</button>
-                        <button type="button" onclick="addEmoji('👏')" class="snap-center shrink-0 hover:scale-110 transition-transform">👏</button>
-                        <button type="button" onclick="addEmoji('⭐')" class="snap-center shrink-0 hover:scale-110 transition-transform">⭐</button>
-                        <button type="button" onclick="addEmoji('🔥')" class="snap-center shrink-0 hover:scale-110 transition-transform">🔥</button>
-                        <button type="button" onclick="addEmoji('🚀')" class="snap-center shrink-0 hover:scale-110 transition-transform">🚀</button>
-                        <button type="button" onclick="addEmoji('🎯')" class="snap-center shrink-0 hover:scale-110 transition-transform">🎯</button>
+                        <button type="button" onclick="addEmoji('👍'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">👍</button>
+                        <button type="button" onclick="addEmoji('💖'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">💖</button>
+                        <button type="button" onclick="addEmoji('👏'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">👏</button>
+                        <button type="button" onclick="addEmoji('⭐'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">⭐</button>
+                        <button type="button" onclick="addEmoji('🔥'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">🔥</button>
+                        <button type="button" onclick="addEmoji('🚀'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">🚀</button>
+                        <button type="button" onclick="addEmoji('🎯'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">🎯</button>
                     </div>
                 </div>
             </div>
-            <button type="button" id="btnSubmitPraise" onclick="doSubmitPraise()" class="btn-modern w-full py-4 text-[15px]" disabled><span id="btnSubmitText">ส่งคำชื่นชม</span></button>
+            <button type="button" id="btnSubmitPraise" onclick="doSubmitPraise(); haptic('heavy');" class="btn-modern w-full py-4 text-[15px]" disabled><span id="btnSubmitText">ส่งคำชื่นชม</span></button>
         </div>
 
         <div id="praiseTabInbox" class="p-6 overflow-y-auto flex-1 hidden bg-slate-50 pb-10">
@@ -461,24 +464,24 @@
     </div>
 
     <div class="floating-fab-wrapper" id="fabPraiseBtn" style="display: none;">
-        <button type="button" onclick="openPraise()" class="floating-praise-btn relative">
+        <button type="button" onclick="openPraise(); haptic('light');" class="floating-praise-btn relative">
             <span class="text-[28px] leading-none drop-shadow-md">👏</span>
             <span id="navNotiBadge" class="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full hidden"></span>
         </button>
     </div>
 
     <nav class="floating-nav hidden" id="mainNavbar">
-        <button type="button" onclick="goHome()" id="navBtnHome" class="flex flex-col items-center justify-center text-blue-600 py-2 relative transition-colors w-16">
+        <button type="button" onclick="goHome(); haptic('light');" id="navBtnHome" class="flex flex-col items-center justify-center text-blue-600 py-2 relative transition-colors w-16">
             <svg class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
             <span class="text-[9px] font-bold tracking-wider">HOME</span>
         </button>
         
-        <button type="button" onclick="openRewards()" id="navBtnRewards" class="flex flex-col items-center justify-center text-slate-400 py-2 transition-colors w-16 relative">
+        <button type="button" onclick="openRewards(); haptic('light');" id="navBtnRewards" class="flex flex-col items-center justify-center text-slate-400 py-2 transition-colors w-16 relative">
             <span class="text-xl leading-none mb-1 grayscale opacity-70 transition-all">🎁</span>
             <span class="text-[9px] font-bold tracking-wider">REWARDS</span>
         </button>
 
-        <button type="button" onclick="openProfile()" id="navBtnProfile" class="flex flex-col items-center justify-center text-slate-400 py-2 transition-colors w-16 relative">
+        <button type="button" onclick="openProfile(); haptic('light');" id="navBtnProfile" class="flex flex-col items-center justify-center text-slate-400 py-2 transition-colors w-16 relative">
             <svg class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
             <span class="text-[9px] font-bold tracking-wider">PROFILE</span>
         </button>
@@ -486,7 +489,7 @@
 </div>
 
 <script>
-    // 🚀 ฝังชิป API GATEWAY PROXY
+    // 🚀 API GATEWAY PROXY
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwmO536QyvMlTMrwiJ-AuoqNSyfimgaaWUYc5qp8UQKMNgap6UGk0TpQL1ZIjTTArjx/exec"; 
 
     if (typeof window.google === 'undefined') {
@@ -527,6 +530,9 @@
     const IMGBB_API_KEY = 'b37889052f6fd7b7143ff017d07914df';
     const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
     
+    // 🔥 ตั้งค่า LINE LIFF ID ตรงนี้ขอรับ!
+    const LIFF_ID = "2009559729-LZSwowcI"; 
+
     let tempEmpId='', isUserFirstTime=true, dashboardData={}; 
     let currentHofTab='allTime', currentRemainingQuota=0, praiseInterval, currentPraiseIdx=0;
     const thaiMonths = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
@@ -560,11 +566,13 @@
     function clearSession() { 
         currentUserSession = null;
         localStorage.removeItem('tqm_session'); 
-        localStorage.removeItem('tqm_dash_cache');
+        localStorage.removeItem('tqm_dash_cache'); 
     }
 
     window.onload = () => {
         setupPullToRefresh();
+        initializeLiff(); // 🔥 สั่งเปิดระบบดักจับ LINE ทันทีที่โหลดหน้าจอ!
+        
         setTimeout(() => { 
             if(!document.getElementById('screen-dashboard').classList.contains('active')) { 
                 const u = getSession(); 
@@ -580,19 +588,92 @@
         }, 500); 
     };
 
+    // ==========================================
+    // 🟢 ระบบเชื่อมต่อและดักจับ LINE LIFF 
+    // ==========================================
+    function initializeLiff() {
+        if(typeof liff === 'undefined') return;
+        
+        liff.init({ liffId: LIFF_ID }).then(() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const linkEmpId = urlParams.get('empId');
+            
+            // ถ้ามี empId แนบมาบน URL แปลว่าเพิ่งกลับมาจากหน้า LIFF เพื่อทำการเชื่อมต่อ
+            if (linkEmpId) {
+                if (!liff.isLoggedIn()) {
+                    liff.login({ redirectUri: window.location.href });
+                } else {
+                    showLoader();
+                    liff.getProfile().then(profile => {
+                        const lineUserId = profile.userId;
+                        
+                        // ส่งไปเซฟหลังบ้าน (Code.gs ต้องมีฟังก์ชัน gsLinkLine นะขอรับ)
+                        google.script.run.withSuccessHandler(r => {
+                            hideLoader();
+                            if(r && r.status === 'success') {
+                                Swal.fire('สำเร็จ!', 'ระบบบันทึก LINE ของคุณเรียบร้อยแล้ว', 'success').then(() => {
+                                    // อัปเดตข้อมูล Session ในเครื่อง
+                                    let u = getSession();
+                                    if(u && String(u.empId) === String(linkEmpId)) { 
+                                        u.lineId = lineUserId; 
+                                        saveSession(u); 
+                                    }
+                                    // ทำความสะอาด URL ไม่ให้มี ?empId ค้างอยู่
+                                    window.location.href = window.location.pathname; 
+                                });
+                            } else {
+                                Swal.fire('ผิดพลาด', r.message, 'error').then(()=> window.location.href = window.location.pathname);
+                            }
+                        }).withFailureHandler(e => {
+                            hideLoader();
+                            Swal.fire('เชื่อมต่อล้มเหลว', 'ไม่สามารถคุยกับเซิร์ฟเวอร์ได้', 'error').then(()=> window.location.href = window.location.pathname);
+                        }).gsLinkLine(linkEmpId, lineUserId);
+                        
+                    }).catch(err => {
+                        hideLoader();
+                        console.error("LIFF Profile Error:", err);
+                        Swal.fire('ผิดพลาด', 'ไม่สามารถดึงข้อมูลโปรไฟล์ LINE ได้', 'error');
+                    });
+                }
+            }
+        }).catch(err => {
+            console.error("LIFF Init Error:", err);
+        });
+    }
+
+    function connectLine() {
+        const u = getSession(); if(!u) return;
+        
+        // พาผู้ใช้ไปหน้า LIFF พร้อมแนบรหัสพนักงานไปกับ URL
+        const lineAuthUrl = "https://liff.line.me/" + LIFF_ID + "?empId=" + u.empId; 
+        
+        Swal.fire({ 
+            title: 'เชื่อมต่อ LINE', 
+            text: 'ระบบจะนำท่านไปยืนยันบัญชี LINE โปรดรอสักครู่', 
+            icon: 'info', 
+            showCancelButton: true, 
+            confirmButtonText: 'เชื่อมต่อเลย' 
+        }).then((result) => { 
+            if (result.isConfirmed) { 
+                window.location.href = lineAuthUrl; // 🚀 เปลี่ยนหน้าไปเลย ไม่ต้องเปิดแท็บใหม่
+            } 
+        });
+    }
+    // ==========================================
+
     function setupPullToRefresh() {
         ptrEl = document.getElementById('screen-dashboard'); ptrContainer = document.getElementById('ptrContainer'); if(!ptrEl || !ptrContainer) return;
         ptrEl.addEventListener('touchstart', e => { if(ptrEl.scrollTop===0){ptrStartY=e.touches[0].clientY;isPulling=true;} }, {passive:true});
         ptrEl.addEventListener('touchmove', e => { if(!isPulling)return; ptrCurrentY=e.touches[0].clientY; let d=ptrCurrentY-ptrStartY; if(d>0&&ptrEl.scrollTop===0){ptrEl.classList.add('screen-pulling');ptrContainer.classList.add('ptr-pulling');ptrEl.style.transform=`translateY(${Math.min(d*0.4,60)}px)`;} }, {passive:true});
-        ptrEl.addEventListener('touchend', () => { if(!isPulling)return; isPulling=false; let d=ptrCurrentY-ptrStartY; ptrEl.classList.remove('screen-pulling');ptrEl.style.transform=''; if(d>100&&ptrEl.scrollTop===0){ptrContainer.classList.remove('ptr-pulling');ptrEl.classList.add('screen-loading');ptrContainer.classList.add('ptr-loading');fetchDashboardData(()=>{setTimeout(()=>{ptrEl.classList.remove('screen-loading');ptrContainer.classList.remove('ptr-loading');showToast('อัปเดตข้อมูลล่าสุดแล้ว','success');},500);});}else{ptrContainer.classList.remove('ptr-pulling');} });
+        ptrEl.addEventListener('touchend', () => { if(!isPulling)return; isPulling=false; let d=ptrCurrentY-ptrStartY; ptrEl.classList.remove('screen-pulling');ptrEl.style.transform=''; if(d>100&&ptrEl.scrollTop===0){haptic('light');ptrContainer.classList.remove('ptr-pulling');ptrEl.classList.add('screen-loading');ptrContainer.classList.add('ptr-loading');fetchDashboardData(()=>{setTimeout(()=>{ptrEl.classList.remove('screen-loading');ptrContainer.classList.remove('ptr-loading');showToast('อัปเดตข้อมูลล่าสุดแล้ว','success');},500);});}else{ptrContainer.classList.remove('ptr-pulling');} });
     }
 
-    function showLoader(){document.getElementById('globalLoader').classList.add('active');} 
-    function hideLoader(){document.getElementById('globalLoader').classList.remove('active');}
+    function haptic(type='light') { try{if(!navigator.vibrate)return;if(type==='light')navigator.vibrate(15);else if(type==='heavy')navigator.vibrate([30,50,30]);else if(type==='success')navigator.vibrate([15,30,15,30,30]);else if(type==='error')navigator.vibrate([50,50,50]);}catch(e){} }
+    function showLoader(){document.getElementById('globalLoader').classList.add('active');} function hideLoader(){document.getElementById('globalLoader').classList.remove('active');}
     function escapeHTML(str){if(!str)return'';return String(str).replace(/[&<>'"]/g,t=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t));}
     function maskEmpInfo(id,fName,lName){try{let sId=id?String(id):'---';let mId=sId.length>3?sId.substring(0,3)+'***':sId+'***';let sFName=fName?String(fName):'ไม่ระบุ';let mLName=lName?String(lName).charAt(0)+'***':'';return{id:mId,name:sFName+' '+mLName};}catch(e){return{id:'***',name:'Unknown'};}}
-    function showToast(m,t='info'){const c=document.getElementById('toastContainer');if(!c)return;c.innerHTML=m;c.className=`toast-notification toast-${t}`;setTimeout(()=>c.classList.add('show'),10);setTimeout(()=>c.classList.remove('show'),3500);}
-    function shootConfetti(){if(typeof confetti==='function'){confetti({particleCount:150,spread:80,origin:{y:0.6},colors:['#3b82f6','#eab308','#ec4899','#10b981']});}}
+    function showToast(m,t='info'){const c=document.getElementById('toastContainer');if(!c)return;c.innerHTML=m;c.className=`toast-notification toast-${t}`;setTimeout(()=>c.classList.add('show'),10);setTimeout(()=>c.classList.remove('show'),3500);if(t==='error')haptic('error');}
+    function shootConfetti(){if(typeof confetti==='function'){haptic('success');confetti({particleCount:150,spread:80,origin:{y:0.6},colors:['#3b82f6','#eab308','#ec4899','#10b981']});}}
     function getEmptyStateHTML(m,i){return`<div class="flex flex-col items-center justify-center py-8 w-full text-center"><div class="text-slate-300 mb-3 bg-slate-50 p-4 rounded-full shadow-inner">${i}</div><p class="text-[13px] font-medium text-slate-500">${m}</p></div>`;}
 
     function renderSkeletons() {
@@ -627,7 +708,7 @@
         document.getElementById('praiseOverlay').classList.remove('active'); document.getElementById('screen-praise').classList.remove('active'); switchScreen('screen-dashboard'); const db=document.getElementById('screen-dashboard'); if(db)db.scrollTo({top:0,behavior:'smooth'}); }
 
     function checkUser() {
-        try { 
+        try { haptic('light');
             const id=document.getElementById('empId').value.trim(); if(!id){showToast('กรุณากรอกรหัสพนักงาน','error');return;}
             if(typeof google==='undefined'){showToast('❌ โปรดรันโปรแกรมผ่าน Web App ของ Google','error');return;}
             const b=document.getElementById('btnNextText');
@@ -637,7 +718,7 @@
     }
 
     function doLogin() {
-        try { 
+        try { haptic('light');
             const p=document.getElementById('password').value.trim(); if(!p){showToast('กรุณากรอกรหัสผ่าน','error');return;}
             const b=document.getElementById('btnLoginText'); if(b)b.innerText="กำลังเข้าสู่ระบบ..."; showLoader();
             google.script.run.withSuccessHandler(r=>{hideLoader();if(b)b.innerText="เข้าสู่ระบบ";
@@ -661,7 +742,7 @@
     }
 
     function doSetupPin() {
-        try { 
+        try { haptic('light');
             const p=document.getElementById('newPin').value.trim(); if(p.length!==6){showToast('กรุณากรอก PIN 6 หลัก','error');return;}
             const b=document.getElementById('btnPinText'); if(b)b.innerText="กำลังบันทึก...";
             showLoader();
@@ -834,19 +915,6 @@
         else { txt.innerText = 'ยังไม่ได้เชื่อมต่อ'; txt.className = 'text-[10px] text-slate-500'; btnC.classList.remove('hidden'); btnU.classList.add('hidden'); }
     }
 
-    function connectLine() {
-        const u = getSession(); if(!u) return;
-        // ลูกพี่เปลี่ยน YOUR_LIFF_ID เป็น LIFF ID จริงๆ ของบริษัทได้เลยขอรับ
-        const lineAuthUrl = "https://liff.line.me/2009559729-LZSwowcI?empId=" + u.empId; 
-        Swal.fire({ title: 'เชื่อมต่อ LINE', text: 'ระบบจะเปิดหน้าต่างใหม่เพื่อเชื่อมต่อ LINE', icon: 'info', showCancelButton: true, confirmButtonText: 'เชื่อมต่อเลย' }).then((result) => { if (result.isConfirmed) { window.open(lineAuthUrl, '_blank'); } });
-    }
-
-    function unlinkLine() {
-        const u = getSession(); if(!u) return;
-        showLoader();
-        google.script.run.withSuccessHandler(r => { hideLoader(); if(r.status === 'success') { u.lineId = ''; saveSession(u); updateLineStatusUI(); showToast('ยกเลิกสำเร็จ'); } }).gsUnlinkLine(u.empId);
-    }
-
     function renderPraises() {
         const w=document.getElementById('praiseBoxWrapper');if(!w)return;
         if(!dashboardData.praises||dashboardData.praises.length===0){w.innerHTML=getEmptyStateHTML("ยังไม่มีคำชื่นชม...",`💬`);w.classList.remove('hidden');return;}
@@ -863,7 +931,7 @@
     }
 
     function switchHofTab(t) {
-        currentHofTab=t;const ba=document.getElementById('btnHofAllTime'),bm=document.getElementById('btnHofMonthly'),c=document.getElementById('dynamicHofContainer');if(!c)return;
+        haptic('light');currentHofTab=t;const ba=document.getElementById('btnHofAllTime'),bm=document.getElementById('btnHofMonthly'),c=document.getElementById('dynamicHofContainer');if(!c)return;
         c.style.opacity='0';setTimeout(()=>{if(t==='allTime'){if(ba)ba.className='px-3.5 py-1.5 rounded-full bg-white text-blue-600 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all';if(bm)bm.className='px-3.5 py-1.5 rounded-full text-slate-400 hover:text-slate-600 transition-all';}else{if(bm)bm.className='px-3.5 py-1.5 rounded-full bg-white text-rose-500 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all';if(ba)ba.className='px-3.5 py-1.5 rounded-full text-slate-400 hover:text-slate-600 transition-all';}renderHallOfFame();c.style.opacity='1';},150);
     }
 
@@ -880,44 +948,27 @@
         let html='';dashboardData.news.forEach((n,i)=>{const sa=n.image||DEFAULT_AVATAR;html+=`<div onclick="openNews(${i})" class="snap-center shrink-0 w-[240px] bg-white rounded-[1.2rem] overflow-hidden shadow-sm border border-slate-100 relative cursor-pointer active:scale-95 transition-transform"><img src="${sa}" onerror="this.src='${DEFAULT_AVATAR}'" class="w-full h-32 object-cover bg-slate-100"><div class="p-4"><span class="bg-[#ef4444] text-white text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase">${n.category||'NEWS'}</span><h4 class="text-sm font-bold text-slate-800 mt-2 line-clamp-2">${escapeHTML(n.title)}</h4></div></div>`;});c.innerHTML=html;
     }
     function openNews(idx) { const n=dashboardData.news[idx];if(!n)return;document.getElementById('modalNewsImg').src=n.image||DEFAULT_AVATAR;document.getElementById('modalNewsCat').innerText=n.category||'NEWS';document.getElementById('modalNewsTitle').innerText=n.title||'';document.getElementById('modalNewsContent').innerHTML=n.content||'';document.getElementById('newsModal').classList.remove('hidden'); }
-    function closeNewsModal() { document.getElementById('newsModal').classList.add('hidden'); }
+    function closeNewsModal() { document.getElementById('newsModal').classList.add('hidden');
+    }
 
     function openPraise() { document.getElementById('praiseOverlay').classList.add('active');document.getElementById('screen-praise').classList.add('active');switchPraiseTab('send',0);if(allEmployees.length===0)fetchPraiseData(); }
-    function closePraise() { document.getElementById('praiseOverlay').classList.remove('active');document.getElementById('screen-praise').classList.remove('active'); }
-    
-    function switchPraiseTab(t,i) { 
-        document.getElementById('tabIndicator').style.transform=`translateX(${i*100}%)`;const ts=document.getElementById('tabSend'),ti=document.getElementById('tabInbox');
-        if(t==='send'){
-            document.getElementById('praiseTabSend').classList.remove('hidden');document.getElementById('praiseTabInbox').classList.add('hidden');
-            if(ts)ts.classList.replace('text-slate-400','text-blue-600');if(ti)ti.classList.replace('text-blue-600','text-slate-400');
-        }else{
-            document.getElementById('praiseTabSend').classList.add('hidden');document.getElementById('praiseTabInbox').classList.remove('hidden');
-            if(ti)ti.classList.replace('text-slate-400','text-blue-600');if(ts)ts.classList.replace('text-blue-600','text-slate-400');
-        } 
+    function closePraise() { document.getElementById('praiseOverlay').classList.remove('active');document.getElementById('screen-praise').classList.remove('active');
     }
-    
-    function filterEmp() { 
-        const txt=document.getElementById('searchEmp').value.toLowerCase().trim();const dp=document.getElementById('empDropdown');if(!dp)return;
-        dp.innerHTML='';if(!txt){dp.classList.add('hidden');return;}const u=getSession()||{empId:''};
-        const f=allEmployees.filter(e=>(String(e.id).toLowerCase().includes(txt)||String(e.name).toLowerCase().includes(txt))&&String(e.id)!==String(u.empId)).slice(0,5);
-        if(f.length===0){dp.innerHTML='<div class="p-4 text-sm text-slate-500 text-center">ไม่พบพนักงานที่ค้นหา</div>';}
-        else{f.forEach(e=>{const d=document.createElement('div');d.className='p-3 hover:bg-slate-50 cursor-pointer flex items-center space-x-3 border-b border-slate-100 last:border-0';d.innerHTML=`<img src="${e.avatar||DEFAULT_AVATAR}" class="w-8 h-8 rounded-full object-cover bg-slate-100"><div><p class="text-sm font-bold text-slate-800">${e.name}</p><p class="text-[10px] text-slate-500">${e.id}</p></div>`;d.onclick=()=>{selectEmp(e);};dp.appendChild(d);});}
-        dp.classList.remove('hidden');
+    function switchPraiseTab(t,i) { haptic('light');document.getElementById('tabIndicator').style.transform=`translateX(${i*100}%)`;const ts=document.getElementById('tabSend'),ti=document.getElementById('tabInbox');if(t==='send'){document.getElementById('praiseTabSend').classList.remove('hidden');document.getElementById('praiseTabInbox').classList.add('hidden');if(ts)ts.classList.replace('text-slate-400','text-blue-600');if(ti)ti.classList.replace('text-blue-600','text-slate-400');}else{document.getElementById('praiseTabSend').classList.add('hidden');document.getElementById('praiseTabInbox').classList.remove('hidden');if(ti)ti.classList.replace('text-slate-400','text-blue-600');if(ts)ts.classList.replace('text-blue-600','text-slate-400');} }
+    function filterEmp() { const txt=document.getElementById('searchEmp').value.toLowerCase().trim();const dp=document.getElementById('empDropdown');if(!dp)return;dp.innerHTML='';if(!txt){dp.classList.add('hidden');return;}const u=getSession()||{empId:''};const f=allEmployees.filter(e=>(String(e.id).toLowerCase().includes(txt)||String(e.name).toLowerCase().includes(txt))&&String(e.id)!==String(u.empId)).slice(0,5);if(f.length===0){dp.innerHTML='<div class="p-4 text-sm text-slate-500 text-center">ไม่พบพนักงานที่ค้นหา</div>';}else{f.forEach(e=>{const d=document.createElement('div');d.className='p-3 hover:bg-slate-50 cursor-pointer flex items-center space-x-3 border-b border-slate-100 last:border-0';d.innerHTML=`<img src="${e.avatar||DEFAULT_AVATAR}" class="w-8 h-8 rounded-full object-cover bg-slate-100"><div><p class="text-sm font-bold text-slate-800">${e.name}</p><p class="text-[10px] text-slate-500">${e.id}</p></div>`;d.onclick=()=>{selectEmp(e);haptic('light');};dp.appendChild(d);});}dp.classList.remove('hidden');
     }
-    
     function selectEmp(e) { selectedReceiverId=e.id;document.getElementById('searchEmpWrapper').classList.add('hidden');document.getElementById('empDropdown').classList.add('hidden');document.getElementById('selEmpName').innerText=e.name;document.getElementById('selEmpId').innerText=e.id;const a=document.getElementById('selEmpAvatar');if(a)a.src=e.avatar||DEFAULT_AVATAR;document.getElementById('selectedEmpCard').classList.remove('hidden');document.getElementById('selectedEmpCard').classList.add('flex');validatePraiseForm(); }
-    
-    function clearSelectedEmp() { selectedReceiverId=null;document.getElementById('selectedEmpCard').classList.add('hidden');document.getElementById('selectedEmpCard').classList.remove('flex');document.getElementById('searchEmp').value='';document.getElementById('searchEmpWrapper').classList.remove('hidden');validatePraiseForm(); }
-    
-    function renderThemes(t) { const c=document.getElementById('themeContainer');if(!c)return;c.innerHTML='';if(!t||t.length===0)return;t.forEach(th=>{const b=document.createElement('button');b.type='button';b.className='theme-pill';b.id='theme-'+th.id;b.innerHTML=`<span class="text-lg leading-none">${th.icon||'🌟'}</span><span>${th.name}</span>`;b.onclick=()=>{selectTheme(th);};c.appendChild(b);}); }
-    
+    function clearSelectedEmp() { selectedReceiverId=null;document.getElementById('selectedEmpCard').classList.add('hidden');document.getElementById('selectedEmpCard').classList.remove('flex');document.getElementById('searchEmp').value='';document.getElementById('searchEmpWrapper').classList.remove('hidden');validatePraiseForm();
+    }
+    function renderThemes(t) { const c=document.getElementById('themeContainer');if(!c)return;c.innerHTML='';if(!t||t.length===0)return;t.forEach(th=>{const b=document.createElement('button');b.type='button';b.className='theme-pill';b.id='theme-'+th.id;b.innerHTML=`<span class="text-lg leading-none">${th.icon||'🌟'}</span><span>${th.name}</span>`;b.onclick=()=>{selectTheme(th);haptic('light');};c.appendChild(b);});
+    }
     function selectTheme(t) { selectedTheme=t;document.querySelectorAll('.theme-pill').forEach(b=>b.classList.remove('active'));const s=document.getElementById('theme-'+t.id);if(s)s.classList.add('active');validatePraiseForm(); }
-    
+    function addEmoji(e) { const el=document.getElementById('praiseMsg');if(el){el.value+=e;validatePraiseForm();} } document.getElementById('praiseMsg').addEventListener('input',validatePraiseForm);
     function validatePraiseForm() { const m=document.getElementById('praiseMsg').value.trim();const b=document.getElementById('btnSubmitPraise');if(!b)return;const bt=document.getElementById('btnSubmitText');if(selectedReceiverId&&selectedTheme&&m.length>0&&currentRemainingQuota>0){b.disabled=false;if(bt)bt.innerText='ส่งคำชื่นชม';}else{b.disabled=true;if(currentRemainingQuota<=0){if(bt)bt.innerText='โควต้าวันนี้หมดแล้ว';}else{if(bt)bt.innerText='ส่งคำชื่นชม';}} }
     
     function doSubmitPraise() { 
         try{
-            const m=document.getElementById('praiseMsg').value.trim();const u=getSession();if(!u)return;
+            haptic('light');const m=document.getElementById('praiseMsg').value.trim();const u=getSession();if(!u)return;
             const b=document.getElementById('btnSubmitText');if(b)b.innerText='กำลังส่ง...';showLoader();
             google.script.run.withSuccessHandler(r=>{
                 hideLoader();
@@ -939,8 +990,8 @@
         google.script.run.withSuccessHandler(r=>{if(r&&r.status==='success')renderThemes(r.data||[]);}).gsGetThemes();
     }
     
-    function startInboxSync() { syncInbox();inboxSyncTimer=setInterval(syncInbox,15000); }
-    
+    function startInboxSync() { syncInbox();inboxSyncTimer=setInterval(syncInbox,15000);
+    }
     function syncInbox() { 
         try {
             const u=getSession();if(!u)return;
@@ -980,7 +1031,8 @@
             if(tb) tb.classList.add('hidden');
         }
         
-        if(inboxData.length === 0){ c.innerHTML=getEmptyStateHTML("กล่องข้อความว่างเปล่า...",`📩`); return; }
+        if(inboxData.length === 0){ c.innerHTML=getEmptyStateHTML("กล่องข้อความว่างเปล่า...",`📩`);
+            return; }
         
         let html='';
         inboxData.forEach(p => {
@@ -992,10 +1044,10 @@
         c.innerHTML = html;
     }
     
-    function likeReceivedPraise(id,pts) { try{const u=getSession();if(!u)return;const c=document.getElementById('inbox-card-'+id);if(!c)return;const b=c.querySelector('button');if(b){b.innerHTML='ประมวลผล...';b.disabled=true;b.classList.replace('bg-rose-50','bg-slate-100');b.classList.replace('text-rose-500','text-slate-400');}showLoader();google.script.run.withSuccessHandler(r=>{hideLoader();if(r&&r.status==='success'){if(b){b.innerHTML='✅ รับคะแนนเรียบร้อย!';b.classList.replace('bg-slate-100','bg-green-50');b.classList.replace('text-slate-400','text-green-600');}showToast(`ได้รับ ${pts} PTS!`,'success');shootConfetti();setTimeout(()=>{c.style.opacity='0';setTimeout(()=>{syncInbox();fetchDashboardData();},300);},1000);}else{showToast(r?r.message:'Error','error');syncInbox();}}).withFailureHandler(e=>{hideLoader();showToast('ล้มเหลว','error');syncInbox();}).gsLikePraise(id,u.empId);}catch(e){hideLoader();} }
+    function likeReceivedPraise(id,pts) { try{haptic('light');const u=getSession();if(!u)return;const c=document.getElementById('inbox-card-'+id);if(!c)return;const b=c.querySelector('button');if(b){b.innerHTML='ประมวลผล...';b.disabled=true;b.classList.replace('bg-rose-50','bg-slate-100');b.classList.replace('text-rose-500','text-slate-400');}showLoader();google.script.run.withSuccessHandler(r=>{hideLoader();if(r&&r.status==='success'){if(b){b.innerHTML='✅ รับคะแนนเรียบร้อย!';b.classList.replace('bg-slate-100','bg-green-50');b.classList.replace('text-slate-400','text-green-600');}showToast(`ได้รับ ${pts} PTS!`,'success');shootConfetti();setTimeout(()=>{c.style.opacity='0';setTimeout(()=>{syncInbox();fetchDashboardData();},300);},1000);}else{showToast(r?r.message:'Error','error');syncInbox();}}).withFailureHandler(e=>{hideLoader();showToast('ล้มเหลว','error');syncInbox();}).gsLikePraise(id,u.empId);}catch(e){hideLoader();} }
 
-    function openRewards() { switchScreen('screen-rewards'); fetchRewards(); }
-    
+    function openRewards() { switchScreen('screen-rewards');
+        fetchRewards(); }
     function fetchRewards() {
         const c = document.getElementById('rewardsContainer');
         c.innerHTML = '<div class="col-span-2 text-center py-8 text-slate-400"><div class="spinner mx-auto mb-2 border-blue-500"></div>กำลังโหลดของรางวัล...</div>';
@@ -1013,7 +1065,8 @@
     }
     
     function renderRewards() {
-        const c=document.getElementById('rewardsContainer'); c.innerHTML='';
+        const c=document.getElementById('rewardsContainer');
+        c.innerHTML='';
         if(rewardsList.length===0){c.innerHTML=`<div class="col-span-2">${getEmptyStateHTML("ยังไม่มีของรางวัลเปิดให้แลกในขณะนี้","🎁")}</div>`;return;}
         rewardsList.forEach((r,i)=>{
             const out=r.stock<=0; const sa=r.image||DEFAULT_AVATAR;
@@ -1022,36 +1075,55 @@
     }
     
     function showRewardModal(i) {
-        activeRewardObj=rewardsList[i]; if(!activeRewardObj)return;
+        activeRewardObj=rewardsList[i];
+        if(!activeRewardObj)return;
         document.getElementById('modalRewardImg').src=activeRewardObj.image||DEFAULT_AVATAR; document.getElementById('modalRewardTitle').innerText=activeRewardObj.title; document.getElementById('modalRewardDesc').innerHTML=escapeHTML(activeRewardObj.description).replace(/\n/g,'<br>'); document.getElementById('modalRewardPts').innerText=activeRewardObj.points;
         document.getElementById('modalRewardPts').innerHTML = `${activeRewardObj.points} <span class="text-[10px] font-normal text-slate-500 block mt-1">(คุณมีสิทธิ์แลก: ${activeRewardObj.eligiblePts} PTS)</span>`;
         document.getElementById('rewardModal').classList.remove('hidden');
     }
     
-    function closeRewardModal() { document.getElementById('rewardModal').classList.add('hidden'); activeRewardObj=null; }
+    function closeRewardModal() { document.getElementById('rewardModal').classList.add('hidden'); activeRewardObj=null;
+    }
     
     function confirmRedeem() {
-        if(!activeRewardObj)return; const u=getSession(); if(!u)return;
-        if(activeRewardObj.eligiblePts < activeRewardObj.points) { showToast('คะแนนสะสมในช่วงเวลาของรางวัลนี้ ไม่เพียงพอครับ', 'error'); return; }
+        if(!activeRewardObj)return;
+        const u=getSession(); if(!u)return;
+        if(activeRewardObj.eligiblePts < activeRewardObj.points) { showToast('คะแนนสะสมในช่วงเวลาของรางวัลนี้ ไม่เพียงพอครับ', 'error'); return;
+        }
         
         Swal.fire({
-            title: 'ยืนยันการแลกรางวัล?', text: `ใช้ ${activeRewardObj.points} PTS เพื่อแลก ${activeRewardObj.title}`, icon: 'question', showCancelButton: true, confirmButtonColor: '#3b82f6', cancelButtonColor: '#cbd5e1', confirmButtonText: 'ยืนยันแลกเลย', cancelButtonText: 'ยกเลิก', customClass: { popup: 'rounded-2xl' }
+            title: 'ยืนยันการแลกรางวัล?',
+            text: `ใช้ ${activeRewardObj.points} PTS เพื่อแลก ${activeRewardObj.title}`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3b82f6',
+            cancelButtonColor: '#cbd5e1',
+            confirmButtonText: 'ยืนยันแลกเลย',
+            cancelButtonText: 'ยกเลิก',
+            customClass: { popup: 'rounded-2xl' }
         }).then((result) => {
             if (result.isConfirmed) {
                 const b=document.getElementById('btnConfirmRedeem'); b.innerText='กำลังแลก...'; b.disabled=true; showLoader();
+                
                 google.script.run.withSuccessHandler(r=>{
                     hideLoader(); b.innerText='ยืนยันแลกสิทธิ์'; b.disabled=false;
-                    if(r&&r.status==='success'){ Swal.fire({ icon: 'success', title: 'แลกสำเร็จ!', text: r.message, timer: 2000, showConfirmButton: false, customClass: { popup: 'rounded-2xl' } }); shootConfetti(); closeRewardModal(); fetchRewards(); fetchDashboardData(); } 
-                    else { Swal.fire('เกิดข้อผิดพลาด', r?r.message:'Error', 'error'); }
+                    if(r&&r.status==='success'){ 
+                        Swal.fire({ icon: 'success', title: 'แลกสำเร็จ!', text: r.message, timer: 2000, showConfirmButton: false, customClass: { popup: 'rounded-2xl' } });
+                        shootConfetti(); closeRewardModal(); fetchRewards(); fetchDashboardData(); 
+                    } else { 
+                        Swal.fire('เกิดข้อผิดพลาด', r?r.message:'Error', 'error');
+                    }
                 }).withFailureHandler(e=>{
-                    hideLoader(); b.innerText='ยืนยันแลกสิทธิ์'; b.disabled=false; Swal.fire('เชื่อมต่อล้มเหลว', 'โปรดตรวจสอบอินเทอร์เน็ต', 'error');
+                    hideLoader(); b.innerText='ยืนยันแลกสิทธิ์'; b.disabled=false;
+                    Swal.fire('เชื่อมต่อล้มเหลว', 'โปรดตรวจสอบอินเทอร์เน็ต', 'error');
                 }).gsRedeemReward(u.empId, activeRewardObj.id);
             }
         });
     }
 
     function shootFireworks() {
-        var duration = 3 * 1000; var end = Date.now() + duration;
+        var duration = 3 * 1000;
+        var end = Date.now() + duration;
         (function frame() {
             confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#f59e0b','#ef4444','#3b82f6'] });
             confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#f59e0b','#ef4444','#3b82f6'] });
@@ -1060,48 +1132,83 @@
     }
 
     function checkSpecialCampaign() {
-        const u = getSession(); if (!u || typeof google === 'undefined') return;
+        const u = getSession();
+        if (!u || typeof google === 'undefined') return;
         
         google.script.run.withSuccessHandler(r => {
-            const block = document.getElementById('rewardJackpotBlock'); const banner = document.getElementById('promoWinnerBanner');
+            const block = document.getElementById('rewardJackpotBlock');
+            const banner = document.getElementById('promoWinnerBanner');
             if (!block) return;
-            if (r.status !== 'success' || r.isCampaignActive === false) { block.classList.add('hidden'); if(banner) banner.classList.add('hidden'); return; }
+            
+            if (r.status !== 'success' || r.isCampaignActive === false) {
+                block.classList.add('hidden'); 
+                if(banner) banner.classList.add('hidden');
+                return;
+            }
+            
             if (r.winnerId && r.winnerId !== '') {
                 block.classList.add('hidden');
                 if(banner) {
-                    banner.classList.remove('hidden'); document.getElementById('winnerBannerName').innerText = r.winnerName;
+                    banner.classList.remove('hidden');
+                    document.getElementById('winnerBannerName').innerText = r.winnerName;
                     let cText = (r.contactName ? r.contactName + " " : "") + (r.contactPhone ? "(โทร: " + r.contactPhone + ")" : "");
                     document.getElementById('winnerBannerContact').innerText = cText;
-                    if(r.winnerId === u.empId && !window.hasFiredWinnerConfetti) { shootFireworks(); window.hasFiredWinnerConfetti = true; }
+                    
+                    if(r.winnerId === u.empId && !window.hasFiredWinnerConfetti) {
+                        shootFireworks();
+                        window.hasFiredWinnerConfetti = true;
+                    }
                 }
                 return;
             }
 
-            block.classList.remove('hidden'); if(banner) banner.classList.add('hidden');
-            block.querySelector('h3').innerText = r.promoName; block.querySelector('p').innerText = r.promoDesc;
+            block.classList.remove('hidden');
+            if(banner) banner.classList.add('hidden');
+            block.querySelector('h3').innerText = r.promoName;
+            block.querySelector('p').innerText = r.promoDesc;
             
-            const progressBar = document.getElementById('rewardProgressBar'); const progressText = document.getElementById('rewardProgressText');
-            let count = r.currentCount || 0; let max = r.maxQuota || 50; if(count > max) count = max;
-            let percent = (count / max) * 100; progressBar.style.width = percent + '%';
+            const progressBar = document.getElementById('rewardProgressBar');
+            const progressText = document.getElementById('rewardProgressText');
+            let count = r.currentCount || 0;
+            let max = r.maxQuota || 50;
+            if(count > max) count = max;
+            let percent = (count / max) * 100;
+            progressBar.style.width = percent + '%';
             if (r.isEligible) {
-                progressText.innerText = "🎉 คุณได้สิทธิ์ลุ้นรางวัลแล้ว รอลุ้นผลได้เลย!"; progressText.className = "text-[10px] font-bold mt-1 block text-green-600"; progressBar.style.background = "linear-gradient(90deg, #10b981 0%, #059669 100%)";
+                progressText.innerText = "🎉 คุณได้สิทธิ์ลุ้นรางวัลแล้ว รอลุ้นผลได้เลย!";
+                progressText.className = "text-[10px] font-bold mt-1 block text-green-600";
+                progressBar.style.background = "linear-gradient(90deg, #10b981 0%, #059669 100%)";
             } else if (count >= max) {
-                progressText.innerText = `โควต้า ${max} คนเต็มแล้ว 😭 รอลุ้นใหม่รอบหน้านะ!`; progressText.className = "text-[10px] font-bold mt-1 block text-rose-500"; progressBar.style.background = "linear-gradient(90deg, #ef4444 0%, #b91c1c 100%)";
+                progressText.innerText = `โควต้า ${max} คนเต็มแล้ว 😭 รอลุ้นใหม่รอบหน้านะ!`;
+                progressText.className = "text-[10px] font-bold mt-1 block text-rose-500";
+                progressBar.style.background = "linear-gradient(90deg, #ef4444 0%, #b91c1c 100%)";
             } else {
-                let remain = max - count; progressText.innerText = `🔥 รีบหน่อย! โควต้าเหลืออีกแค่ ${remain} ที่!`; progressText.className = "text-[10px] text-blue-600 font-medium mt-1 block"; progressBar.style.background = "linear-gradient(90deg, #3b82f6 0%, #1e40af 100%)";
+                let remain = max - count;
+                progressText.innerText = `🔥 รีบหน่อย! โควต้าเหลืออีกแค่ ${remain} ที่!`;
+                progressText.className = "text-[10px] text-blue-600 font-medium mt-1 block";
+                progressBar.style.background = "linear-gradient(90deg, #3b82f6 0%, #1e40af 100%)";
             }
         }).gsGetActivePromotionStatus(u.empId);
     }
-
+    
     // ==========================================
-    // 🚪 ฟังก์ชันออกจากระบบ 
+    // 🚪 ฟังก์ชันออกจากระบบแบบทะลวงไส้ (ชัวร์ 100%)
     // ==========================================
     window.logout = function() {
         Swal.fire({
-            title: 'กำลังออกจากระบบ...', text: 'กรุณารอสักครู่ขอรับลูกพี่!', allowOutsideClick: false, showConfirmButton: false, didOpen: () => { Swal.showLoading(); }
+            title: 'กำลังออกจากระบบ...',
+            text: 'กรุณารอสักครู่ขอรับลูกพี่!',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => { Swal.showLoading(); }
         });
+        
         setTimeout(() => {
-            try { localStorage.removeItem('tqm_session'); localStorage.removeItem('tqm_dash_cache'); currentUserSession = null; } catch(e) {}
+            try {
+                localStorage.removeItem('tqm_session');
+                localStorage.removeItem('tqm_dash_cache');
+                currentUserSession = null;
+            } catch(e) {}
             window.location.href = window.location.pathname + '?t=' + new Date().getTime();
         }, 800);
     };
