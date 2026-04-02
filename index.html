@@ -338,7 +338,7 @@
                         get: function(target, prop) {
                             if (prop in target) return target[prop];
                             return function(...args) {
-                                // 🌟 ส่งข้อมูลแบบเปลือยๆ ห้ามใส่ Header เพื่อทะลวงกำแพง Google
+                                // 🔥 ส่งข้อมูลแบบเปลือยๆ ลบ headers และ redirect ออกให้หมด! ทะลวง CORS 100%
                                 fetch(GAS_API_URL, {
                                     method: 'POST',
                                     body: JSON.stringify({ action: prop, args: args })
@@ -346,9 +346,8 @@
                                 .then(res => res.json())
                                 .then(data => { if (_success) _success(data); })
                                 .catch(err => { 
-                                    console.error("API Error:", err);
+                                    console.error("CORS Error:", err); 
                                     if (_failure) _failure(err); 
-                                    else Swal.fire('ข้อผิดพลาดเครือข่าย', 'โปรดเปิดผ่าน GitHub Pages และหลีกเลี่ยงการเปิดจากไฟล์ในเครื่องตรงๆ (file://)', 'error');
                                 });
                             }
                         }
