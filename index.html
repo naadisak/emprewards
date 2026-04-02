@@ -837,7 +837,7 @@
     function connectLine() {
         const u = getSession(); if(!u) return;
         // ลูกพี่เปลี่ยน YOUR_LIFF_ID เป็น LIFF ID จริงๆ ของบริษัทได้เลยขอรับ
-        const lineAuthUrl = "https://liff.line.me/YOUR_LIFF_ID?empId=" + u.empId; 
+        const lineAuthUrl = "https://liff.line.me/2009559729-LZSwowcI?empId=" + u.empId; 
         Swal.fire({ title: 'เชื่อมต่อ LINE', text: 'ระบบจะเปิดหน้าต่างใหม่เพื่อเชื่อมต่อ LINE', icon: 'info', showCancelButton: true, confirmButtonText: 'เชื่อมต่อเลย' }).then((result) => { if (result.isConfirmed) { window.open(lineAuthUrl, '_blank'); } });
     }
 
