@@ -111,7 +111,7 @@
     <div id="screen-login-step2" class="screen relative bg-slate-50 !p-0">
         <div class="login-bg"><div class="login-blob-top"></div><div class="login-blob-top-2"></div><div class="login-blob-bottom"></div></div>
 
-        <button type="button" onclick="switchScreen('screen-login-step1')" class="absolute top-8 left-6 text-slate-500 hover:text-slate-800 p-2.5 z-20 bg-white/60 backdrop-blur-md rounded-full shadow-sm border border-white">
+        <button type="button" onclick="switchScreen('screen-login-step1'); haptic('light');" class="absolute top-8 left-6 text-slate-500 hover:text-slate-800 p-2.5 z-20 bg-white/60 backdrop-blur-md rounded-full shadow-sm border border-white">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
         </button>
 
@@ -157,9 +157,11 @@
     <div id="screen-setup-pin" class="screen relative bg-slate-50 !p-0">
         <div class="login-bg"><div class="login-blob-top"></div><div class="login-blob-top-2"></div><div class="login-blob-bottom"></div></div>
         <div class="flex-1 min-h-[40vh]"></div>
+        
         <div class="relative z-10 w-full px-8 pb-16">
             <h1 class="text-[34px] font-black text-slate-800 leading-tight mb-3 tracking-tight">ตั้งรหัส PIN</h1>
             <p class="text-[14px] text-slate-500 mb-10 font-medium">ตั้งรหัส 6 หลักสำหรับการเข้าใช้งานครั้งถัดไป</p>
+            
             <div class="login-card">
                 <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
                 <div class="flex-1">
@@ -167,6 +169,7 @@
                     <input type="password" id="newPin" maxlength="6" placeholder="••••••" inputmode="numeric" class="tracking-[0.3em]" oninput="this.value = this.value.replace(/[^0-9]/g, '')" onkeypress="if(event.key === 'Enter') doSetupPin();">
                 </div>
             </div>
+            
             <div class="mt-4">
                 <button type="button" onclick="doSetupPin()" id="btnPin" class="btn-modern w-full py-4 text-[15px] justify-center">
                     <span id="btnPinText">ยืนยันรหัส PIN</span>
@@ -185,7 +188,9 @@
                     <div>
                         <h3 class="text-[14px] font-black tracking-wide drop-shadow-md">ประกาศผลแคมเปญพิเศษ!</h3>
                         <p class="text-[12px] font-medium mt-0.5 leading-tight">ขอแสดงความยินดีกับคุณ <span id="winnerBannerName" class="font-black text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded shadow-sm">...</span></p>
-                        <p class="text-[10px] text-white/90 mt-1.5 bg-black/20 p-1.5 rounded inline-block">📞 กรุณาติดต่อ: <span id="winnerBannerContact" class="font-bold">...</span> ภายใน 7 วัน</p>
+                        <p class="text-[10px] text-white/90 mt-1.5 bg-black/20 p-1.5 rounded inline-block">
+                            📞 กรุณาติดต่อ: <span id="winnerBannerContact" class="font-bold">...</span> ภายใน 7 วัน
+                        </p>
                     </div>
                 </div>
             </div>
@@ -201,6 +206,7 @@
         <div class="px-6 space-y-4 relative z-10 mt-2">
             <div class="relative w-full aspect-[1.586/1] rounded-[1.25rem] p-5 text-white shadow-[0_20px_40px_-10px_rgba(0,61,232,0.4)] overflow-hidden flex flex-col justify-between"
                  style="background: linear-gradient(135deg, #292e85 0%, #003de8 40%, #000875 100%);">
+                
                 <svg class="absolute inset-0 w-full h-full opacity-20 pointer-events-none mix-blend-overlay" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="85%" cy="15%" r="35%" fill="none" stroke="white" stroke-width="1.5"/>
                     <circle cx="85%" cy="15%" r="55%" fill="none" stroke="white" stroke-width="1.5"/>
@@ -208,13 +214,16 @@
                     <circle cx="30%" cy="110%" r="30%" fill="none" stroke="white" stroke-width="1.5"/>
                     <circle cx="30%" cy="110%" r="50%" fill="none" stroke="white" stroke-width="1.5"/>
                 </svg>
+
                 <img id="cardBgAvatar" src="" class="absolute top-0 right-0 h-full w-[55%] object-cover opacity-[0.9] mix-blend-screen pointer-events-none" style="-webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%); mask-image: linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);">
+                
                 <div class="relative z-10 flex justify-start">
                     <div class="text-left">
                         <h3 class="text-xl font-medium tracking-[0.15em] leading-none text-white/90">LIFE+</h3>
                         <p class="text-[8px] tracking-[0.2em] font-light mt-1 text-white/80 uppercase">REWARDS CARD</p>
                     </div>
                 </div>
+
                 <div class="relative z-10 mt-2 flex flex-col gap-3 w-full overflow-hidden">
                     <div class="flex items-center gap-4">
                         <svg xmlns="http://www.w3.org/2000/svg" width="45" height="32" viewBox="0 0 45 32" class="drop-shadow-md shrink-0">
@@ -222,15 +231,18 @@
                             <path d="M12 0v32 M33 0v32 M0 10h45 M0 22h45" stroke="#d97706" stroke-width="1" fill="none" opacity="0.6"/>
                             <rect x="16" y="8" width="13" height="16" rx="2" stroke="#d97706" stroke-width="1" fill="none" opacity="0.6"/>
                         </svg>
+                        
                         <div class="flex items-baseline pb-1">
                             <span id="cardTotalPts" class="text-[32px] font-black tracking-tight" style="background: linear-gradient(180deg, #fef08a 0%, #eab308 50%, #a16207 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.4)); line-height: 1;">0</span>
                             <span class="text-[16px] font-bold ml-1.5 uppercase tracking-widest text-yellow-400 drop-shadow-md" style="line-height: 1; filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.5));">pts</span>
                         </div>
                     </div>
+                    
                     <div id="txtCardNumbers" class="text-[clamp(13px,4.5vw,20px)] font-mono tracking-wider sm:tracking-widest font-medium drop-shadow-[0_2px_3px_rgba(0,0,0,0.6)] w-full whitespace-nowrap overflow-hidden mt-1">
                         000000 0000000000 0000
                     </div>
                 </div>
+
                 <div class="relative z-10 flex justify-between items-end mt-4">
                     <div class="flex-1 overflow-hidden pr-2">
                         <p id="txtFullName" class="text-[14px] font-medium truncate drop-shadow-md">ไม่ระบุชื่อ</p>
@@ -286,12 +298,17 @@
 
     <div id="screen-rewards" class="screen bg-slate-50 !p-0">
         <div class="px-6 pt-12 pb-4 bg-white shadow-sm z-20 sticky top-0 border-b border-slate-100 flex justify-between items-center">
-            <h2 class="text-xl font-bold text-slate-800 tracking-wide flex items-center gap-2">🎁 แลกของรางวัล</h2>
+            <h2 class="text-xl font-bold text-slate-800 tracking-wide flex items-center gap-2">
+                🎁 แลกของรางวัล
+            </h2>
             <div class="bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-bold text-sm shadow-sm border border-amber-200">
                 <span id="rewardsAvailablePts">0</span> PTS
             </div>
         </div>
-        <div class="p-6 pb-32"><div id="rewardsContainer" class="grid grid-cols-2 gap-4"></div></div>
+        <div class="p-6 pb-32">
+            <div id="rewardsContainer" class="grid grid-cols-2 gap-4">
+                </div>
+        </div>
     </div>
 
     <div id="screen-profile" class="slide-up-modal">
@@ -301,7 +318,7 @@
         </div>
         <div class="p-6">
             <div class="flex justify-center mb-10 relative">
-                <label class="relative cursor-pointer hover:opacity-90 transition-opacity block">
+                <label class="relative cursor-pointer hover:opacity-90 transition-opacity block" onclick="haptic('light')">
                     <img id="editAvatarPreview" src="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23cbd5e1\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" class="w-28 h-28 rounded-full object-cover border-[4px] shadow-lg border-white relative z-10 bg-slate-100">
                     <div class="absolute bottom-0 right-0 bg-blue-600 p-2.5 rounded-full text-white border-2 border-white shadow-sm z-20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /></svg>
@@ -337,7 +354,7 @@
                     </div>
                 </div>
 
-                <button type="button" onclick="saveProfile()" class="btn-modern w-full py-3.5 mt-2 text-[14px] rounded-xl"><span id="btnSaveText">บันทึกข้อมูล</span></button>
+                <button type="button" onclick="saveProfile(); haptic('light');" class="btn-modern w-full py-3.5 mt-2 text-[14px] rounded-xl"><span id="btnSaveText">บันทึกข้อมูล</span></button>
             </div>
 
             <div class="mb-4">
@@ -352,7 +369,7 @@
                 </div>
             </div>
 
-            <button type="button" onclick="logout()" class="w-full py-4 mt-8 font-bold text-rose-500 bg-rose-50 border border-rose-100 rounded-xl hover:bg-rose-100 transition-colors flex items-center justify-center gap-2 shadow-sm">
+            <button type="button" onclick="logout(); haptic('heavy');" class="w-full py-4 mt-8 font-bold text-rose-500 bg-rose-50 border border-rose-100 rounded-xl hover:bg-rose-100 transition-colors flex items-center justify-center gap-2 shadow-sm">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                 ออกจากระบบ (LOGOUT)
             </button>
@@ -369,7 +386,7 @@
                 <div id="modalNewsContent" class="text-sm text-slate-600 leading-relaxed mt-4"></div>
             </div>
             <div class="p-4 border-t border-slate-100 bg-slate-50">
-                <button type="button" onclick="closeNewsModal()" class="w-full bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-colors">ปิดหน้าต่าง</button>
+                <button type="button" onclick="closeNewsModal(); haptic('light');" class="w-full bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-colors">ปิดหน้าต่าง</button>
             </div>
         </div>
     </div>
@@ -386,8 +403,8 @@
                 </div>
             </div>
             <div class="p-4 border-t border-slate-100 bg-slate-50 flex gap-3">
-                <button type="button" onclick="closeRewardModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-colors">ยกเลิก</button>
-                <button type="button" id="btnConfirmRedeem" onclick="confirmRedeem()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-sm">ยืนยันแลกสิทธิ์</button>
+                <button type="button" onclick="closeRewardModal(); haptic('light');" class="flex-1 bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-colors">ยกเลิก</button>
+                <button type="button" id="btnConfirmRedeem" onclick="confirmRedeem(); haptic('heavy');" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-sm">ยืนยันแลกสิทธิ์</button>
             </div>
         </div>
     </div>
@@ -397,8 +414,8 @@
         <div class="w-full flex justify-center pt-4 pb-2 cursor-pointer" onclick="goHome()"><div class="w-12 h-1.5 bg-slate-200 rounded-full"></div></div>
         
         <div class="relative flex border-b border-slate-200">
-            <button type="button" onclick="switchPraiseTab('send', 0)" id="tabSend" class="flex-1 py-3.5 text-[14px] font-bold text-blue-600 transition-colors z-10">✍️ เขียนคำชื่นชม</button>
-            <button type="button" onclick="switchPraiseTab('inbox', 1)" id="tabInbox" class="flex-1 py-3.5 text-[14px] font-bold text-slate-400 transition-colors z-10 relative">
+            <button type="button" onclick="switchPraiseTab('send', 0); haptic('light');" id="tabSend" class="flex-1 py-3.5 text-[14px] font-bold text-blue-600 transition-colors z-10">✍️ เขียนคำชื่นชม</button>
+            <button type="button" onclick="switchPraiseTab('inbox', 1); haptic('light');" id="tabInbox" class="flex-1 py-3.5 text-[14px] font-bold text-slate-400 transition-colors z-10 relative">
                 📩 กล่องข้อความ
                 <span id="inboxNotiBadge" class="absolute top-3 right-8 w-2 h-2 bg-red-500 rounded-full hidden"></span>
             </button>
@@ -422,7 +439,7 @@
                         <img id="selEmpAvatar" src="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23cbd5e1\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" class="w-10 h-10 rounded-full object-cover border border-white shadow-sm bg-slate-100">
                         <div><p id="selEmpName" class="font-bold text-slate-800 text-sm"></p><p id="selEmpId" class="text-xs text-slate-500"></p></div>
                     </div>
-                    <button type="button" onclick="clearSelectedEmp()" class="text-red-500 text-xs font-semibold px-2 py-1 hover:bg-red-50 rounded">เปลี่ยนคน</button>
+                    <button type="button" onclick="clearSelectedEmp(); haptic('light');" class="text-red-500 text-xs font-semibold px-2 py-1 hover:bg-red-50 rounded">เปลี่ยนคน</button>
                 </div>
             </div>
 
@@ -436,17 +453,17 @@
                 <div class="bg-white border border-slate-200 rounded-xl overflow-hidden focus-within:border-blue-500 transition-colors">
                     <textarea id="praiseMsg" rows="3" class="w-full p-4 outline-none resize-none text-[14px] text-slate-600 placeholder:text-slate-400" placeholder="พิมพ์ความในใจของคุณที่นี่..."></textarea>
                     <div class="bg-white p-2 flex justify-center gap-4 px-4 text-xl snap-x pb-3 border-t border-slate-50">
-                        <button type="button" onclick="addEmoji('👍')" class="snap-center shrink-0 hover:scale-110 transition-transform">👍</button>
-                        <button type="button" onclick="addEmoji('💖')" class="snap-center shrink-0 hover:scale-110 transition-transform">💖</button>
-                        <button type="button" onclick="addEmoji('👏')" class="snap-center shrink-0 hover:scale-110 transition-transform">👏</button>
-                        <button type="button" onclick="addEmoji('⭐')" class="snap-center shrink-0 hover:scale-110 transition-transform">⭐</button>
-                        <button type="button" onclick="addEmoji('🔥')" class="snap-center shrink-0 hover:scale-110 transition-transform">🔥</button>
-                        <button type="button" onclick="addEmoji('🚀')" class="snap-center shrink-0 hover:scale-110 transition-transform">🚀</button>
-                        <button type="button" onclick="addEmoji('🎯')" class="snap-center shrink-0 hover:scale-110 transition-transform">🎯</button>
+                        <button type="button" onclick="addEmoji('👍'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">👍</button>
+                        <button type="button" onclick="addEmoji('💖'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">💖</button>
+                        <button type="button" onclick="addEmoji('👏'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">👏</button>
+                        <button type="button" onclick="addEmoji('⭐'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">⭐</button>
+                        <button type="button" onclick="addEmoji('🔥'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">🔥</button>
+                        <button type="button" onclick="addEmoji('🚀'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">🚀</button>
+                        <button type="button" onclick="addEmoji('🎯'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">🎯</button>
                     </div>
                 </div>
             </div>
-            <button type="button" id="btnSubmitPraise" onclick="doSubmitPraise()" class="btn-modern w-full py-4 text-[15px]" disabled><span id="btnSubmitText">ส่งคำชื่นชม</span></button>
+            <button type="button" id="btnSubmitPraise" onclick="doSubmitPraise(); haptic('heavy');" class="btn-modern w-full py-4 text-[15px]" disabled><span id="btnSubmitText">ส่งคำชื่นชม</span></button>
         </div>
 
         <div id="praiseTabInbox" class="p-6 overflow-y-auto flex-1 hidden bg-slate-50 pb-10">
@@ -456,24 +473,24 @@
     </div>
 
     <div class="floating-fab-wrapper" id="fabPraiseBtn" style="display: none;">
-        <button type="button" onclick="openPraise()" class="floating-praise-btn relative">
+        <button type="button" onclick="openPraise(); haptic('light');" class="floating-praise-btn relative">
             <span class="text-[28px] leading-none drop-shadow-md">👏</span>
             <span id="navNotiBadge" class="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full hidden"></span>
         </button>
     </div>
 
     <nav class="floating-nav hidden" id="mainNavbar">
-        <button type="button" onclick="goHome()" id="navBtnHome" class="flex flex-col items-center justify-center text-blue-600 py-2 relative transition-colors w-16">
+        <button type="button" onclick="goHome(); haptic('light');" id="navBtnHome" class="flex flex-col items-center justify-center text-blue-600 py-2 relative transition-colors w-16">
             <svg class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
             <span class="text-[9px] font-bold tracking-wider">HOME</span>
         </button>
         
-        <button type="button" onclick="openRewards()" id="navBtnRewards" class="flex flex-col items-center justify-center text-slate-400 py-2 transition-colors w-16 relative">
+        <button type="button" onclick="openRewards(); haptic('light');" id="navBtnRewards" class="flex flex-col items-center justify-center text-slate-400 py-2 transition-colors w-16 relative">
             <span class="text-xl leading-none mb-1 grayscale opacity-70 transition-all">🎁</span>
             <span class="text-[9px] font-bold tracking-wider">REWARDS</span>
         </button>
 
-        <button type="button" onclick="openProfile()" id="navBtnProfile" class="flex flex-col items-center justify-center text-slate-400 py-2 transition-colors w-16 relative">
+        <button type="button" onclick="openProfile(); haptic('light');" id="navBtnProfile" class="flex flex-col items-center justify-center text-slate-400 py-2 transition-colors w-16 relative">
             <svg class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
             <span class="text-[9px] font-bold tracking-wider">PROFILE</span>
         </button>
@@ -522,7 +539,8 @@
     const IMGBB_API_KEY = 'b37889052f6fd7b7143ff017d07914df';
     const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
     
-    const LIFF_ID = "2009559729-LZSwowcl"; 
+    // 🔥 ตั้งค่า LINE LIFF ID ที่ถูกต้องเป๊ะๆ
+    const LIFF_ID = "2009559729-LZSwowcI"; 
 
     let tempEmpId='', isUserFirstTime=true, dashboardData={}; 
     let currentHofTab='allTime', currentRemainingQuota=0, praiseInterval, currentPraiseIdx=0;
@@ -594,7 +612,6 @@
                 if (action === 'link' && linkEmpId) {
                     processLinkLine(linkEmpId);
                 } else if (action === 'loginWithLine' && linkEmpId) {
-                    // กลับมาจากการกดเข้าสู่ระบบด้วย LINE
                     tempEmpId = linkEmpId;
                     doLoginWithLine();
                 }
@@ -661,8 +678,7 @@
             const originalText = bText ? bText.innerText : 'เข้าสู่ระบบด้วย LINE';
             
             if (!liff.isLoggedIn()) {
-                const redirectUrl = window.location.origin + window.location.pathname + "?action=loginWithLine&empId=" + tempEmpId;
-                liff.login({ redirectUri: redirectUrl });
+                window.location.href = "https://liff.line.me/" + LIFF_ID + "?action=loginWithLine&empId=" + tempEmpId;
                 return;
             }
             
@@ -684,6 +700,7 @@
                         startDashboardSync();
                         showToast(`ยินดีต้อนรับ, คุณ ${r.userData.name.split(' ')[0]}`, 'success');
                         shootConfetti();
+                        window.history.replaceState({}, document.title, window.location.pathname);
                     } else {
                         Swal.fire('เข้าสู่ระบบล้มเหลว', r.message || 'บัญชี LINE นี้ยังไม่ได้เชื่อมต่อ', 'error').then(()=> window.location.href = window.location.pathname);
                     }
@@ -708,7 +725,7 @@
         ptrEl = document.getElementById('screen-dashboard'); ptrContainer = document.getElementById('ptrContainer'); if(!ptrEl || !ptrContainer) return;
         ptrEl.addEventListener('touchstart', e => { if(ptrEl.scrollTop===0){ptrStartY=e.touches[0].clientY;isPulling=true;} }, {passive:true});
         ptrEl.addEventListener('touchmove', e => { if(!isPulling)return; ptrCurrentY=e.touches[0].clientY; let d=ptrCurrentY-ptrStartY; if(d>0&&ptrEl.scrollTop===0){ptrEl.classList.add('screen-pulling');ptrContainer.classList.add('ptr-pulling');ptrEl.style.transform=`translateY(${Math.min(d*0.4,60)}px)`;} }, {passive:true});
-        ptrEl.addEventListener('touchend', () => { if(!isPulling)return; isPulling=false; let d=ptrCurrentY-ptrStartY; ptrEl.classList.remove('screen-pulling');ptrEl.style.transform=''; if(d>100&&ptrEl.scrollTop===0){ptrContainer.classList.remove('ptr-pulling');ptrEl.classList.add('screen-loading');ptrContainer.classList.add('ptr-loading');fetchDashboardData(()=>{setTimeout(()=>{ptrEl.classList.remove('screen-loading');ptrContainer.classList.remove('ptr-loading');showToast('อัปเดตข้อมูลล่าสุดแล้ว','success');},500);});}else{ptrContainer.classList.remove('ptr-pulling');} });
+        ptrEl.addEventListener('touchend', () => { if(!isPulling)return; isPulling=false; let d=ptrCurrentY-ptrStartY; ptrEl.classList.remove('screen-pulling');ptrEl.style.transform=''; if(d>100&&ptrEl.scrollTop===0){haptic('light');ptrContainer.classList.remove('ptr-pulling');ptrEl.classList.add('screen-loading');ptrContainer.classList.add('ptr-loading');fetchDashboardData(()=>{setTimeout(()=>{ptrEl.classList.remove('screen-loading');ptrContainer.classList.remove('ptr-loading');showToast('อัปเดตข้อมูลล่าสุดแล้ว','success');},500);});}else{ptrContainer.classList.remove('ptr-pulling');} });
     }
 
     function showLoader(){document.getElementById('globalLoader').classList.add('active');} 
@@ -716,7 +733,7 @@
     function escapeHTML(str){if(!str)return'';return String(str).replace(/[&<>'"]/g,t=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t));}
     function maskEmpInfo(id,fName,lName){try{let sId=id?String(id):'---';let mId=sId.length>3?sId.substring(0,3)+'***':sId+'***';let sFName=fName?String(fName):'ไม่ระบุ';let mLName=lName?String(lName).charAt(0)+'***':'';return{id:mId,name:sFName+' '+mLName};}catch(e){return{id:'***',name:'Unknown'};}}
     function showToast(m,t='info'){const c=document.getElementById('toastContainer');if(!c)return;c.innerHTML=m;c.className=`toast-notification toast-${t}`;setTimeout(()=>c.classList.add('show'),10);setTimeout(()=>c.classList.remove('show'),3500);}
-    function shootConfetti(){if(typeof confetti==='function'){confetti({particleCount:150,spread:80,origin:{y:0.6},colors:['#3b82f6','#eab308','#ec4899','#10b981']});}}
+    function shootConfetti(){if(typeof confetti==='function'){haptic('success');confetti({particleCount:150,spread:80,origin:{y:0.6},colors:['#3b82f6','#eab308','#ec4899','#10b981']});}}
     function getEmptyStateHTML(m,i){return`<div class="flex flex-col items-center justify-center py-8 w-full text-center"><div class="text-slate-300 mb-3 bg-slate-50 p-4 rounded-full shadow-inner">${i}</div><p class="text-[13px] font-medium text-slate-500">${m}</p></div>`;}
 
     function renderSkeletons() {
@@ -751,7 +768,7 @@
         document.getElementById('praiseOverlay').classList.remove('active'); document.getElementById('screen-praise').classList.remove('active'); switchScreen('screen-dashboard'); const db=document.getElementById('screen-dashboard'); if(db)db.scrollTo({top:0,behavior:'smooth'}); }
 
     function checkUser() {
-        try { 
+        try { haptic('light');
             const id=document.getElementById('empId').value.trim(); if(!id){showToast('กรุณากรอกรหัสพนักงาน','error');return;}
             if(typeof google==='undefined'){showToast('❌ โปรดรันโปรแกรมผ่าน Web App ของ Google','error');return;}
             const b=document.getElementById('btnNextText');
@@ -761,7 +778,7 @@
     }
 
     function doLogin() {
-        try { 
+        try { haptic('light');
             const p=document.getElementById('password').value.trim(); if(!p){showToast('กรุณากรอกรหัสผ่าน','error');return;}
             const b=document.getElementById('btnLoginText'); if(b)b.innerText="กำลังเข้าสู่ระบบ..."; showLoader();
             google.script.run.withSuccessHandler(r=>{hideLoader();if(b)b.innerText="เข้าสู่ระบบด้วยรหัส PIN";
@@ -785,7 +802,7 @@
     }
 
     function doSetupPin() {
-        try { 
+        try { haptic('light');
             const p=document.getElementById('newPin').value.trim(); if(p.length!==6){showToast('กรุณากรอก PIN 6 หลัก','error');return;}
             const b=document.getElementById('btnPinText'); if(b)b.innerText="กำลังบันทึก...";
             showLoader();
@@ -980,7 +997,7 @@
     }
 
     function switchHofTab(t) {
-        currentHofTab=t;const ba=document.getElementById('btnHofAllTime'),bm=document.getElementById('btnHofMonthly'),c=document.getElementById('dynamicHofContainer');if(!c)return;
+        haptic('light');currentHofTab=t;const ba=document.getElementById('btnHofAllTime'),bm=document.getElementById('btnHofMonthly'),c=document.getElementById('dynamicHofContainer');if(!c)return;
         c.style.opacity='0';setTimeout(()=>{if(t==='allTime'){if(ba)ba.className='px-3.5 py-1.5 rounded-full bg-white text-blue-600 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all';if(bm)bm.className='px-3.5 py-1.5 rounded-full text-slate-400 hover:text-slate-600 transition-all';}else{if(bm)bm.className='px-3.5 py-1.5 rounded-full bg-white text-rose-500 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all';if(ba)ba.className='px-3.5 py-1.5 rounded-full text-slate-400 hover:text-slate-600 transition-all';}renderHallOfFame();c.style.opacity='1';},150);
     }
 
