@@ -111,7 +111,7 @@
     <div id="screen-login-step2" class="screen relative bg-slate-50 !p-0">
         <div class="login-bg"><div class="login-blob-top"></div><div class="login-blob-top-2"></div><div class="login-blob-bottom"></div></div>
 
-        <button type="button" onclick="switchScreen('screen-login-step1'); haptic('light');" class="absolute top-8 left-6 text-slate-500 hover:text-slate-800 p-2.5 z-20 bg-white/60 backdrop-blur-md rounded-full shadow-sm border border-white">
+        <button type="button" onclick="switchScreen('screen-login-step1')" class="absolute top-8 left-6 text-slate-500 hover:text-slate-800 p-2.5 z-20 bg-white/60 backdrop-blur-md rounded-full shadow-sm border border-white">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
         </button>
 
@@ -134,10 +134,21 @@
                 </div>
             </div>
             
-            <div class="flex justify-end mt-4">
-                <button type="button" onclick="doLogin()" id="btnLogin" class="btn-modern px-8 py-3.5 text-[15px]">
-                    <span id="btnLoginText">เข้าสู่ระบบ</span>
+            <div class="flex flex-col gap-3 mt-6">
+                <button type="button" onclick="doLogin()" id="btnLogin" class="btn-modern w-full py-3.5 text-[15px]">
+                    <span id="btnLoginText">เข้าสู่ระบบด้วยรหัส PIN</span>
                     <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                </button>
+                
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-slate-200"></div>
+                    <span class="flex-shrink-0 mx-4 text-slate-400 text-[10px] font-bold uppercase tracking-widest">หรือ</span>
+                    <div class="flex-grow border-t border-slate-200"></div>
+                </div>
+                
+                <button type="button" onclick="doLoginWithLine()" id="btnLineLogin" class="bg-[#00B900] text-white font-bold rounded-2xl w-full py-3.5 text-[14px] flex items-center justify-center gap-2 shadow-[0_10px_20px_-5px_rgba(0,185,0,0.4)] transition-all active:scale-95 border-2 border-white">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.036 9.608.391.084.922.258 1.057.592.122.303.079.778.039 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.647 1.281-.54 6.911-4.069 9.428-6.967 1.739-1.907 2.572-3.843 2.572-5.992z"/></svg>
+                    <span id="btnLineLoginText">เข้าสู่ระบบด้วย LINE</span>
                 </button>
             </div>
         </div>
@@ -146,11 +157,9 @@
     <div id="screen-setup-pin" class="screen relative bg-slate-50 !p-0">
         <div class="login-bg"><div class="login-blob-top"></div><div class="login-blob-top-2"></div><div class="login-blob-bottom"></div></div>
         <div class="flex-1 min-h-[40vh]"></div>
-        
         <div class="relative z-10 w-full px-8 pb-16">
             <h1 class="text-[34px] font-black text-slate-800 leading-tight mb-3 tracking-tight">ตั้งรหัส PIN</h1>
             <p class="text-[14px] text-slate-500 mb-10 font-medium">ตั้งรหัส 6 หลักสำหรับการเข้าใช้งานครั้งถัดไป</p>
-            
             <div class="login-card">
                 <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
                 <div class="flex-1">
@@ -158,7 +167,6 @@
                     <input type="password" id="newPin" maxlength="6" placeholder="••••••" inputmode="numeric" class="tracking-[0.3em]" oninput="this.value = this.value.replace(/[^0-9]/g, '')" onkeypress="if(event.key === 'Enter') doSetupPin();">
                 </div>
             </div>
-            
             <div class="mt-4">
                 <button type="button" onclick="doSetupPin()" id="btnPin" class="btn-modern w-full py-4 text-[15px] justify-center">
                     <span id="btnPinText">ยืนยันรหัส PIN</span>
@@ -177,9 +185,7 @@
                     <div>
                         <h3 class="text-[14px] font-black tracking-wide drop-shadow-md">ประกาศผลแคมเปญพิเศษ!</h3>
                         <p class="text-[12px] font-medium mt-0.5 leading-tight">ขอแสดงความยินดีกับคุณ <span id="winnerBannerName" class="font-black text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded shadow-sm">...</span></p>
-                        <p class="text-[10px] text-white/90 mt-1.5 bg-black/20 p-1.5 rounded inline-block">
-                            📞 กรุณาติดต่อ: <span id="winnerBannerContact" class="font-bold">...</span> ภายใน 7 วัน
-                        </p>
+                        <p class="text-[10px] text-white/90 mt-1.5 bg-black/20 p-1.5 rounded inline-block">📞 กรุณาติดต่อ: <span id="winnerBannerContact" class="font-bold">...</span> ภายใน 7 วัน</p>
                     </div>
                 </div>
             </div>
@@ -195,7 +201,6 @@
         <div class="px-6 space-y-4 relative z-10 mt-2">
             <div class="relative w-full aspect-[1.586/1] rounded-[1.25rem] p-5 text-white shadow-[0_20px_40px_-10px_rgba(0,61,232,0.4)] overflow-hidden flex flex-col justify-between"
                  style="background: linear-gradient(135deg, #292e85 0%, #003de8 40%, #000875 100%);">
-                
                 <svg class="absolute inset-0 w-full h-full opacity-20 pointer-events-none mix-blend-overlay" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="85%" cy="15%" r="35%" fill="none" stroke="white" stroke-width="1.5"/>
                     <circle cx="85%" cy="15%" r="55%" fill="none" stroke="white" stroke-width="1.5"/>
@@ -203,16 +208,13 @@
                     <circle cx="30%" cy="110%" r="30%" fill="none" stroke="white" stroke-width="1.5"/>
                     <circle cx="30%" cy="110%" r="50%" fill="none" stroke="white" stroke-width="1.5"/>
                 </svg>
-
                 <img id="cardBgAvatar" src="" class="absolute top-0 right-0 h-full w-[55%] object-cover opacity-[0.9] mix-blend-screen pointer-events-none" style="-webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%); mask-image: linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);">
-                
                 <div class="relative z-10 flex justify-start">
                     <div class="text-left">
                         <h3 class="text-xl font-medium tracking-[0.15em] leading-none text-white/90">LIFE+</h3>
                         <p class="text-[8px] tracking-[0.2em] font-light mt-1 text-white/80 uppercase">REWARDS CARD</p>
                     </div>
                 </div>
-
                 <div class="relative z-10 mt-2 flex flex-col gap-3 w-full overflow-hidden">
                     <div class="flex items-center gap-4">
                         <svg xmlns="http://www.w3.org/2000/svg" width="45" height="32" viewBox="0 0 45 32" class="drop-shadow-md shrink-0">
@@ -220,18 +222,15 @@
                             <path d="M12 0v32 M33 0v32 M0 10h45 M0 22h45" stroke="#d97706" stroke-width="1" fill="none" opacity="0.6"/>
                             <rect x="16" y="8" width="13" height="16" rx="2" stroke="#d97706" stroke-width="1" fill="none" opacity="0.6"/>
                         </svg>
-                        
                         <div class="flex items-baseline pb-1">
                             <span id="cardTotalPts" class="text-[32px] font-black tracking-tight" style="background: linear-gradient(180deg, #fef08a 0%, #eab308 50%, #a16207 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.4)); line-height: 1;">0</span>
                             <span class="text-[16px] font-bold ml-1.5 uppercase tracking-widest text-yellow-400 drop-shadow-md" style="line-height: 1; filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.5));">pts</span>
                         </div>
                     </div>
-                    
                     <div id="txtCardNumbers" class="text-[clamp(13px,4.5vw,20px)] font-mono tracking-wider sm:tracking-widest font-medium drop-shadow-[0_2px_3px_rgba(0,0,0,0.6)] w-full whitespace-nowrap overflow-hidden mt-1">
                         000000 0000000000 0000
                     </div>
                 </div>
-
                 <div class="relative z-10 flex justify-between items-end mt-4">
                     <div class="flex-1 overflow-hidden pr-2">
                         <p id="txtFullName" class="text-[14px] font-medium truncate drop-shadow-md">ไม่ระบุชื่อ</p>
@@ -287,17 +286,12 @@
 
     <div id="screen-rewards" class="screen bg-slate-50 !p-0">
         <div class="px-6 pt-12 pb-4 bg-white shadow-sm z-20 sticky top-0 border-b border-slate-100 flex justify-between items-center">
-            <h2 class="text-xl font-bold text-slate-800 tracking-wide flex items-center gap-2">
-                🎁 แลกของรางวัล
-            </h2>
+            <h2 class="text-xl font-bold text-slate-800 tracking-wide flex items-center gap-2">🎁 แลกของรางวัล</h2>
             <div class="bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-bold text-sm shadow-sm border border-amber-200">
                 <span id="rewardsAvailablePts">0</span> PTS
             </div>
         </div>
-        <div class="p-6 pb-32">
-            <div id="rewardsContainer" class="grid grid-cols-2 gap-4">
-                </div>
-        </div>
+        <div class="p-6 pb-32"><div id="rewardsContainer" class="grid grid-cols-2 gap-4"></div></div>
     </div>
 
     <div id="screen-profile" class="slide-up-modal">
@@ -307,7 +301,7 @@
         </div>
         <div class="p-6">
             <div class="flex justify-center mb-10 relative">
-                <label class="relative cursor-pointer hover:opacity-90 transition-opacity block" onclick="haptic('light')">
+                <label class="relative cursor-pointer hover:opacity-90 transition-opacity block">
                     <img id="editAvatarPreview" src="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23cbd5e1\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" class="w-28 h-28 rounded-full object-cover border-[4px] shadow-lg border-white relative z-10 bg-slate-100">
                     <div class="absolute bottom-0 right-0 bg-blue-600 p-2.5 rounded-full text-white border-2 border-white shadow-sm z-20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /></svg>
@@ -528,8 +522,7 @@
     const IMGBB_API_KEY = 'b37889052f6fd7b7143ff017d07914df';
     const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
     
-    // 🔥 ตั้งค่า LINE LIFF ID ที่ถูกต้องเป๊ะๆ!
-    const LIFF_ID = "2009559729-LZSwowcI"; 
+    const LIFF_ID = "2009559729-LZSwowcl"; 
 
     let tempEmpId='', isUserFirstTime=true, dashboardData={}; 
     let currentHofTab='allTime', currentRemainingQuota=0, praiseInterval, currentPraiseIdx=0;
@@ -587,19 +580,27 @@
     };
 
     // ==========================================
-    // 🟢 ระบบเชื่อมต่อและดักจับ LINE LIFF 
+    // 🟢 ระบบ LINE LIFF (เชื่อมต่อ & เข้าสู่ระบบ)
     // ==========================================
     function initializeLiff() {
         if(typeof liff === 'undefined') return;
         
         liff.init({ liffId: LIFF_ID }).then(() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const action = urlParams.get('action');
+            const linkEmpId = urlParams.get('empId');
+            
             if (liff.isLoggedIn()) {
-                const urlParams = new URLSearchParams(window.location.search);
-                const action = urlParams.get('action');
-                const linkEmpId = urlParams.get('empId');
-                
                 if (action === 'link' && linkEmpId) {
                     processLinkLine(linkEmpId);
+                } else if (action === 'loginWithLine' && linkEmpId) {
+                    // กลับมาจากการกดเข้าสู่ระบบด้วย LINE
+                    tempEmpId = linkEmpId;
+                    doLoginWithLine();
+                }
+            } else {
+                if (action === 'link' || action === 'loginWithLine') {
+                    liff.login({ redirectUri: window.location.href });
                 }
             }
         }).catch(err => {
@@ -609,7 +610,6 @@
 
     function connectLine() {
         const u = getSession(); if(!u) return;
-        
         Swal.fire({ 
             title: 'เชื่อมต่อ LINE', 
             text: 'ระบบจะนำท่านไปหน้ายืนยันบัญชี LINE', 
@@ -619,12 +619,7 @@
             confirmButtonColor: '#00B900'
         }).then((result) => { 
             if (result.isConfirmed) { 
-                if (!liff.isLoggedIn()) {
-                    const redirectUrl = window.location.origin + window.location.pathname + "?action=link&empId=" + u.empId;
-                    liff.login({ redirectUri: redirectUrl });
-                } else {
-                    processLinkLine(u.empId);
-                }
+                window.location.href = "https://liff.line.me/" + LIFF_ID + "?action=link&empId=" + u.empId;
             } 
         });
     }
@@ -633,7 +628,6 @@
         showLoader();
         liff.getProfile().then(profile => {
             const lineUserId = profile.userId;
-            
             google.script.run.withSuccessHandler(r => {
                 hideLoader();
                 if(r && r.status === 'success') {
@@ -652,11 +646,61 @@
                 hideLoader();
                 Swal.fire('เชื่อมต่อล้มเหลว', 'ไม่สามารถส่งข้อมูลไปหลังบ้านได้', 'error').then(()=> window.location.href = window.location.pathname);
             }).gsLinkLine(empId, lineUserId); 
-            
         }).catch(err => {
             hideLoader();
             Swal.fire('ผิดพลาด', 'ไม่สามารถดึงข้อมูลโปรไฟล์ LINE ได้', 'error').then(()=> window.location.href = window.location.pathname);
         });
+    }
+
+    // 🔥 ฟังก์ชันเข้าสู่ระบบด้วย LINE (กดจากหน้าใส่ PIN)
+    function doLoginWithLine() {
+        try {
+            if(!tempEmpId) { showToast('กรุณากรอกรหัสพนักงานก่อน', 'error'); return; }
+            
+            const bText = document.getElementById('btnLineLoginText'); 
+            const originalText = bText ? bText.innerText : 'เข้าสู่ระบบด้วย LINE';
+            
+            if (!liff.isLoggedIn()) {
+                const redirectUrl = window.location.origin + window.location.pathname + "?action=loginWithLine&empId=" + tempEmpId;
+                liff.login({ redirectUri: redirectUrl });
+                return;
+            }
+            
+            if(bText) bText.innerText = "กำลังตรวจสอบ...";
+            showLoader();
+            
+            liff.getProfile().then(profile => {
+                const lineUserId = profile.userId;
+                google.script.run.withSuccessHandler(r => {
+                    hideLoader();
+                    if(bText) bText.innerText = originalText;
+                    if(r && r.status === 'success') {
+                        saveSession(r.userData); 
+                        renderDashboardInfo(r.userData);
+                        renderSkeletons();
+                        fetchDashboardData();
+                        fetchPraiseData();
+                        startInboxSync();
+                        startDashboardSync();
+                        showToast(`ยินดีต้อนรับ, คุณ ${r.userData.name.split(' ')[0]}`, 'success');
+                        shootConfetti();
+                    } else {
+                        Swal.fire('เข้าสู่ระบบล้มเหลว', r.message || 'บัญชี LINE นี้ยังไม่ได้เชื่อมต่อ', 'error').then(()=> window.location.href = window.location.pathname);
+                    }
+                }).withFailureHandler(e => {
+                    hideLoader();
+                    if(bText) bText.innerText = originalText;
+                    showToast('เชื่อมต่อล้มเหลว', 'error');
+                }).gsLoginWithLine(tempEmpId, lineUserId);
+            }).catch(err => {
+                hideLoader();
+                if(bText) bText.innerText = originalText;
+                Swal.fire('ผิดพลาด', 'ไม่สามารถดึงข้อมูลโปรไฟล์ LINE ได้', 'error');
+            });
+        } catch(e) {
+            hideLoader();
+            showToast('Error', 'error');
+        }
     }
     // ==========================================
 
@@ -720,7 +764,7 @@
         try { 
             const p=document.getElementById('password').value.trim(); if(!p){showToast('กรุณากรอกรหัสผ่าน','error');return;}
             const b=document.getElementById('btnLoginText'); if(b)b.innerText="กำลังเข้าสู่ระบบ..."; showLoader();
-            google.script.run.withSuccessHandler(r=>{hideLoader();if(b)b.innerText="เข้าสู่ระบบ";
+            google.script.run.withSuccessHandler(r=>{hideLoader();if(b)b.innerText="เข้าสู่ระบบด้วยรหัส PIN";
                 if(r&&r.status==='success'){
                     if(r.isFirstTime) switchScreen('screen-setup-pin');
                     else {
@@ -736,7 +780,7 @@
                 } else {
                     showToast(r?r.message:'รหัสผ่านไม่ถูกต้อง','error');
                 }
-            }).withFailureHandler(e=>{hideLoader();if(b)b.innerText="เข้าสู่ระบบ";showToast('เชื่อมต่อล้มเหลว','error');}).gsLogin(tempEmpId,p);
+            }).withFailureHandler(e=>{hideLoader();if(b)b.innerText="เข้าสู่ระบบด้วยรหัส PIN";showToast('เชื่อมต่อล้มเหลว','error');}).gsLogin(tempEmpId,p);
         } catch(e){hideLoader();}
     }
 
