@@ -318,10 +318,7 @@
 
 <script>
     // ==========================================
-    // 🚀 API GATEWAY PROXY
-    // ==========================================
-    // ==========================================
-    // 🚀 API GATEWAY PROXY (ไม้ตายหลบ CORS 100%)
+    // 🚀 API GATEWAY PROXY (อัปเกรดเกราะป้องกัน 100%)
     // ==========================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwmO536QyvMlTMrwiJ-AuoqNSyfimgaaWUYc5qp8UQKMNgap6UGk0TpQL1ZIjTTArjx/exec"; 
 
@@ -338,12 +335,19 @@
                         get: function(target, prop) {
                             if (prop in target) return target[prop];
                             return function(...args) {
-                                // 🔥 ส่งแบบเปลือย 100% ห้ามใส่ Headers เด็ดขาด! เพื่อไม่ให้เบราว์เซอร์แอบส่ง OPTIONS
+                                // 🔥 ทะลวงกำแพง Google ต้องมี Header เป็น text/plain และ redirect: follow
                                 fetch(GAS_API_URL, {
+                                    redirect: "follow",
                                     method: 'POST',
+                                    headers: {
+                                        "Content-Type": "text/plain;charset=utf-8"
+                                    },
                                     body: JSON.stringify({ action: prop, args: args })
                                 })
-                                .then(res => res.json())
+                                .then(res => {
+                                    if(!res.ok) throw new Error("Google API Error: " + res.status);
+                                    return res.json();
+                                })
                                 .then(data => { if (_success) _success(data); })
                                 .catch(err => { 
                                     console.error("API Error:", err); 
