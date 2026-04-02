@@ -1090,6 +1090,31 @@
             }
         }).gsGetActivePromotionStatus(u.empId);
     }
+
+    // ==========================================
+    // 🚪 ฟังก์ชันออกจากระบบแบบทะลวงไส้ (ชัวร์ 100%)
+    // ==========================================
+    window.logout = function() {
+        // เด้งหน้าต่างโหลดเพื่อยืนยันว่าปุ่มกดติดแล้ว!
+        Swal.fire({
+            title: 'กำลังออกจากระบบ...',
+            text: 'กรุณารอสักครู่ขอรับลูกพี่!',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+        
+        // ล้างข้อมูลและเตะกลับหน้าแรก
+        setTimeout(() => {
+            try {
+                localStorage.removeItem('tqm_session');
+                localStorage.removeItem('tqm_dash_cache');
+                currentUserSession = null;
+            } catch(e) {}
+            // รีเฟรชหน้าเว็บแบบล้างแคช
+            window.location.href = window.location.pathname + '?t=' + new Date().getTime();
+        }, 800);
+    };
 </script>
 </body>
 </html>
