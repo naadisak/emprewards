@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - TQM Life+</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bai+Jamjuree:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body { font-family: 'Inter', 'Bai Jamjuree', sans-serif; background-color: #f8fafc; color: #475569; margin: 0; overflow: hidden; height: 100vh; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        #adminLoader { position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 999999; display: flex; justify-content: center; align-items: center; visibility: hidden; opacity: 0; transition: all 0.3s; }
+        #adminLoader.show { visibility: visible; opacity: 1; }
+        .spinner { width: 36px; height: 36px; border: 3px solid #e2e8f0; border-top-color: #4f46e5; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        #loginScreen { display: flex; } #mainApp { display: none; }
+        .view-section { display: none; animation: fadeIn 0.3s ease-out; } .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-item { transition: all 0.2s ease; border-left: 3px solid transparent; cursor: pointer; }
+        .nav-item:hover, .nav-item.active { background-color: #e0e7ff; color: #4f46e5; border-left-color: #4f46e5; font-weight: 600; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 50000; opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box { background: white; border-radius: 12px; width: 100%; max-width: 480px; transform: scale(0.95); opacity: 0; transition: all 0.3s; }
+        .modal-overlay.active .modal-box { transform: scale(1); opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div id="adminLoader"><div class="spinner"></div></div>
+
+    <div id="loginScreen" class="w-full h-full bg-slate-50 flex-col items-center justify-center px-4 relative">
+        <div class="bg-white p-10 rounded-2xl shadow-lg w-full max-w-sm border border-slate-100">
+            <h1 class="text-2xl font-bold text-slate-900 mb-8 text-center">Admin Login</h1>
+            <div class="space-y-5">
+                <input type="text" id="adminId" class="w-full rounded-lg border px-4 py-2.5" placeholder="Employee ID">
+                <input type="password" id="adminPin" class="w-full rounded-lg border px-4 py-2.5" placeholder="PIN Code">
+                <button onclick="doAdminLogin()" class="w-full rounded-lg bg-indigo-600 py-2.5 text-white font-semibold">Sign In</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainApp" class="w-full h-full bg-slate-50 hidden">
+        <aside id="sidebar" class="w-64 bg-white flex flex-col shrink-0 border-r border-slate-200">
+            <div class="flex items-center gap-3 px-6 h-16 border-b border-slate-100 shrink-0"><span class="text-lg font-bold text-slate-900">AdminPanel</span></div>
+            <div class="flex flex-col flex-1 py-6 px-3 overflow-y-auto">
+                <nav class="space-y-1">
+                    <a onclick="switchView('dashboard')" id="nav-dashboard" class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm">📊 Dashboard</a>
+                    <a onclick="switchView('promotions')" id="nav-promotions" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm">✨ Promotions</a> 
+                </nav>
+            </div>
+            <button onclick="doAdminLogout()" class="m-4 bg-slate-100 py-2 rounded-lg text-sm font-bold text-slate-600">Log out</button>
+        </aside>
+
+        <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+            <div class="flex-1 overflow-y-auto p-4 md:p-8">
+                
+                <div id="view-dashboard" class="view-section active max-w-7xl mx-auto space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-blue-600 rounded-2xl p-6 text-white shadow-lg"><p class="text-sm">Total Employees</p><h3 class="text-4xl font-black" id="dashTotalEmp">0</h3></div>
+                        <div class="bg-emerald-500 rounded-2xl p-6 text-white shadow-lg"><p class="text-sm">Active Accounts</p><h3 class="text-4xl font-black" id="dashActiveEmp">0</h3></div>
+                        <div class="bg-rose-500 rounded-2xl p-6 text-white shadow-lg"><p class="text-sm">Total Praises</p><h3 class="text-4xl font-black" id="dashTotalPraises">0</h3></div>
+                        <div class="bg-amber-500 rounded-2xl p-6 text-white shadow-lg"><p class="text-sm">Points Distributed</p><h3 class="text-4xl font-black" id="dashTotalPoints">0</h3></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        <div class="bg-white rounded-2xl shadow-sm p-6 col-span-1 lg:col-span-3 flex flex-col h-[400px]">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-lg">📈 เปรียบเทียบกิจกรรม</h3>
+                                <div class="bg-slate-100 p-1 rounded-lg flex gap-1 text-xs font-bold">
+                                    <button onclick="setChartDateRange(7)" id="btnChart7" class="px-3 py-1.5 rounded-md">7 วัน</button>
+                                    <button onclick="setChartDateRange(30)" id="btnChart30" class="px-3 py-1.5 rounded-md bg-white text-blue-600 shadow-sm">30 วัน</button>
+                                    <button onclick="setChartDateRange(60)" id="btnChart60" class="px-3 py-1.5 rounded-md">60 วัน</button>
+                                </div>
+                            </div>
+                            <div class="relative flex-1 w-full"><canvas id="activityChart"></canvas></div>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-sm p-6 col-span-1 flex flex-col h-[400px]">
+                            <h3 class="font-bold text-lg mb-2">🏷️ หมวดหมู่</h3>
+                            <div id="themeFilterBlock" class="overflow-y-auto flex flex-wrap gap-2 content-start flex-1"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm flex flex-col h-[550px]">
+                        <div class="p-6 border-b flex justify-between items-center">
+                            <h3 class="font-bold text-lg">📋 ประวัติการใช้งานทั้งหมด</h3>
+                            <div class="bg-slate-100 p-1 rounded-lg flex gap-1 text-xs font-bold">
+                                <button onclick="setTableDateRange(7)" id="btnTable7" class="px-3 py-1.5 rounded-md">7 วัน</button>
+                                <button onclick="setTableDateRange(30)" id="btnTable30" class="px-3 py-1.5 rounded-md bg-white text-blue-600 shadow-sm">30 วัน</button>
+                                <button onclick="setTableDateRange(60)" id="btnTable60" class="px-3 py-1.5 rounded-md">60 วัน</button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto flex-1 bg-white rounded-b-2xl">
+                            <table class="w-full text-left text-sm whitespace-nowrap" id="dashTable">
+                                <thead class="bg-slate-50 text-slate-500 text-xs uppercase sticky top-0 shadow-sm">
+                                    <tr>
+                                        <th class="p-3 w-32"><input type="text" id="fltDate" placeholder="📅 วันที่" class="w-full px-2 py-1.5 border rounded" onkeyup="filterDashTable()"></th>
+                                        <th class="p-3 w-48"><input type="text" id="fltSender" placeholder="👤 ผู้ส่ง" class="w-full px-2 py-1.5 border rounded" onkeyup="filterDashTable()"></th>
+                                        <th class="p-3 w-48"><input type="text" id="fltReceiver" placeholder="👤 ผู้รับ" class="w-full px-2 py-1.5 border rounded" onkeyup="filterDashTable()"></th>
+                                        <th class="p-3 w-32"><input type="text" id="fltTheme" placeholder="🏷️ หมวดหมู่" class="w-full px-2 py-1.5 border rounded" onkeyup="filterDashTable()"></th>
+                                        <th class="p-3"><input type="text" id="fltMsg" placeholder="💬 ข้อความ" class="w-full px-2 py-1.5 border rounded" onkeyup="filterDashTable()"></th>
+                                        <th class="p-3 w-20 text-center font-bold">👍 Likes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashHistoryTable"><tr><td colspan="6" class="text-center py-6">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-promotions" class="view-section max-w-7xl mx-auto h-full pb-10">
+                    <div class="bg-white rounded-xl shadow-sm flex flex-col h-auto">
+                        <div class="p-6 border-b shrink-0 flex justify-between items-center">
+                            <h3 class="font-bold text-lg">รายการโปรโมชันพิเศษ</h3>
+                            <button onclick="openPromoModal('')" class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold">+ Add Promotion</button>
+                        </div>
+                        <div class="overflow-x-auto flex-1 bg-white">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead class="bg-slate-50 text-slate-500 text-xs uppercase"><tr><th class="py-4 px-6">Promo_Name</th><th class="py-4 px-6">Promo_Desc</th><th class="py-4 px-6 text-center">Max_Quota</th><th class="py-4 px-6 text-right">Actions</th></tr></thead>
+                                <tbody id="promoTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="promoModal" class="modal-overlay">
+        <div class="modal-box p-6 space-y-4">
+            <h3 class="font-bold text-lg" id="promoModalTitle">Promotion</h3>
+            <input type="hidden" id="promoId">
+            <input type="text" id="promoName" class="w-full rounded-lg border px-3 py-2 text-sm" placeholder="Promo Name">
+            <input type="text" id="promoDesc" class="w-full rounded-lg border px-3 py-2 text-sm" placeholder="Description">
+            <input type="number" id="promoQuota" class="w-full rounded-lg border px-3 py-2 text-sm" placeholder="Quota">
+            <div class="flex justify-end gap-3"><button onclick="closePromoModal()" class="px-4 py-2 border rounded-lg">Cancel</button><button onclick="savePromotion()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg">Save</button></div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 🚀 API GATEWAY PROXY (รันบน GitHub ได้ 100%)
+        // ==========================================
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzWP95xfCYx7wqmB3SrmkSoUq6i0ApfZE74_kOAJ_C_LI-TGvRO3I9rG3VddDSjP1Jv/exec"; 
+
+        if (typeof window.google === 'undefined') {
+            window.google = {
+                script: {
+                    get run() {
+                        let _success = null;
+                        let _failure = null;
+                        const runner = {
+                            withSuccessHandler: function(cb) { _success = cb; return new Proxy(this, proxyHandler); },
+                            withFailureHandler: function(cb) { _failure = cb; return new Proxy(this, proxyHandler); }
+                        };
+                        const proxyHandler = {
+                            get: function(target, prop) {
+                                if (prop in target) return target[prop];
+                                return function(...args) {
+                                    fetch(GAS_API_URL, {
+                                        redirect: "follow", method: 'POST',
+                                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                                        body: JSON.stringify({ action: prop, args: args })
+                                    })
+                                    .then(res => res.json())
+                                    .then(data => { if (_success) _success(data); })
+                                    .catch(err => { if (_failure) _failure(err); });
+                                }
+                            }
+                        };
+                        return new Proxy(runner, proxyHandler);
+                    }
+                }
+            };
+        }
+
+        let activityChartInstance = null;
+        let dashRawPraises = [], dashThemes = [], activeThemeFilters = [];
+        let chartRange = 30, tableRange = 30;
+        let allPromotions=[]; 
+
+        function showLoader() { document.getElementById('adminLoader').classList.add('show'); } 
+        function hideLoader() { document.getElementById('adminLoader').classList.remove('show'); }
+        function escapeHTML(s){if(!s)return'';return String(s).replace(/[&<>'"]/g,t=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t));}
+        
+        function switchView(v) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); document.getElementById('view-'+v).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); document.getElementById('nav-'+v).classList.add('active');
+            if(v==='dashboard') fetchDashboardStats();
+            else if(v==='promotions') fetchPromotions();
+        }
+
+        function getAdminSession() {
+            const s = localStorage.getItem('tqm_admin_session');
+            if(s) { try { return JSON.parse(decodeURIComponent(atob(s))); } catch(e) { return null; } } return null;
+        }
+
+        window.onload = () => {
+            const obj = getAdminSession();
+            if(obj) { document.getElementById('loginScreen').style.display='none'; document.getElementById('mainApp').style.display='flex'; switchView('dashboard'); }
+        };
+
+        function doAdminLogin() { 
+            const i=document.getElementById('adminId').value.trim(), p=document.getElementById('adminPin').value.trim(); 
+            showLoader(); 
+            google.script.run.withSuccessHandler(r=>{
+                hideLoader();
+                if(r&&r.status==='success'){
+                    localStorage.setItem('tqm_admin_session', btoa(encodeURIComponent(JSON.stringify(r.userData))));
+                    location.reload();
+                } else { alert(r.message); }
+            }).gsAdminLogin(i,p); 
+        }
+
+        function doAdminLogout() { localStorage.removeItem('tqm_admin_session'); location.reload(); }
+
+        function fetchDashboardStats() { const u=getAdminSession(); if(!u)return; showLoader(); google.script.run.withSuccessHandler(r=>{hideLoader(); if(r&&r.status==='success')renderAdminDashboard(r.data);}).gsAdminGetDashboardStats(u.empId); }
+        
+        function renderAdminDashboard(d) {
+            if(!d) return;
+            document.getElementById('dashTotalEmp').innerText = d.totalEmp || 0; document.getElementById('dashActiveEmp').innerText = d.activeEmp || 0; document.getElementById('dashTotalPraises').innerText = d.totalPraises || 0; document.getElementById('dashTotalPoints').innerText = d.totalPoints || 0;
+            dashRawPraises = d.rawPraises || []; dashThemes = Object.keys(d.themeCount || {});
+            renderThemeBadges(); updateDashboardViews();
+        }
+
+        function renderThemeBadges() {
+            const container = document.getElementById('themeFilterBlock');
+            let html = `<button onclick="toggleThemeFilter('ALL')" class="border px-4 py-2 rounded-full text-[13px] font-bold">ทั้งหมด</button>`;
+            dashThemes.forEach(t => { html += `<button onclick="toggleThemeFilter('${escapeHTML(t)}')" class="border px-4 py-2 rounded-full text-[13px] font-bold">${escapeHTML(t)}</button>`; });
+            container.innerHTML = html;
+        }
+
+        function toggleThemeFilter(theme) {
+            if(theme === 'ALL') activeThemeFilters = [];
+            else { if(activeThemeFilters.includes(theme)) activeThemeFilters = activeThemeFilters.filter(t => t !== theme); else activeThemeFilters.push(theme); }
+            renderThemeBadges(); updateDashboardViews(); 
+        }
+
+        function setChartDateRange(days) { chartRange = days; updateDashboardViews(true, false); }
+        function setTableDateRange(days) { tableRange = days; updateDashboardViews(false, true); }
+
+        function updateDashboardViews(updateChart = true, updateTable = true) {
+            let themeFilteredData = dashRawPraises;
+            if(activeThemeFilters.length > 0) themeFilteredData = dashRawPraises.filter(p => activeThemeFilters.includes(p.theme));
+            const now = new Date(); now.setHours(23,59,59,999);
+
+            if(updateChart) {
+                let cutoffChart = new Date(); cutoffChart.setDate(now.getDate() - chartRange + 1); cutoffChart.setHours(0,0,0,0);
+                let chartData = themeFilteredData.filter(p => p.timeRaw >= cutoffChart.getTime());
+                let labels = [], map = {};
+                for(let i = chartRange - 1; i >= 0; i--) { let d = new Date(); d.setDate(now.getDate() - i); let l = d.getDate() + '/' + (d.getMonth()+1); labels.push(l); map[l] = { praises: 0, likes: 0 }; }
+                chartData.forEach(p => { let d = new Date(p.timeRaw); let l = d.getDate() + '/' + (d.getMonth()+1); if(map[l]) { map[l].praises += 1; map[l].likes += p.likes || 0; } });
+                renderChart(labels, labels.map(l => map[l].praises), labels.map(l => map[l].likes));
+            }
+
+            if(updateTable) {
+                let cutoffTable = new Date(); cutoffTable.setDate(now.getDate() - tableRange + 1); cutoffTable.setHours(0,0,0,0);
+                let tableData = themeFilteredData.filter(p => p.timeRaw >= cutoffTable.getTime());
+                renderDashTable(tableData);
+            }
+        }
+
+        function renderChart(labels, praises, likes) {
+            if(activityChartInstance) activityChartInstance.destroy();
+            const ctx = document.getElementById('activityChart').getContext('2d');
+            activityChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: labels, datasets: [ { type: 'bar', label: 'Praises', data: praises, backgroundColor: '#3b82f6' }, { type: 'line', label: 'Likes', data: likes, borderColor: '#f59e0b' } ] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function renderDashTable(data) {
+            const tb = document.getElementById('dashHistoryTable'); tb.innerHTML = '';
+            if(data && data.length > 0) {
+                data.forEach(p => { tb.innerHTML += `<tr class="border-b"><td>${p.timeStr}</td><td>${escapeHTML(p.senderName)}</td><td>${escapeHTML(p.receiverName)}</td><td>${escapeHTML(p.theme)}</td><td>${escapeHTML(p.msg)}</td><td class="text-center text-rose-500">${p.likes}</td></tr>`; });
+            } else { tb.innerHTML = '<tr><td colspan="6" class="text-center py-8">ไม่มีข้อมูล</td></tr>'; }
+            filterDashTable();
+        }
+
+        function filterDashTable() {
+            const trs = document.querySelectorAll('#dashHistoryTable tr');
+            trs.forEach(tr => {
+                if(tr.cells.length < 6) return;
+                const dText = tr.cells[0].textContent.toLowerCase(), sText = tr.cells[1].textContent.toLowerCase(), rText = tr.cells[2].textContent.toLowerCase(), tText = tr.cells[3].textContent.toLowerCase(), mText = tr.cells[4].textContent.toLowerCase();
+                if(dText.includes(document.getElementById('fltDate').value.toLowerCase()) && sText.includes(document.getElementById('fltSender').value.toLowerCase()) && rText.includes(document.getElementById('fltReceiver').value.toLowerCase()) && tText.includes(document.getElementById('fltTheme').value.toLowerCase()) && mText.includes(document.getElementById('fltMsg').value.toLowerCase())) { tr.style.display = ''; } else { tr.style.display = 'none'; }
+            });
+        }
+
+        function fetchPromotions() {
+            google.script.run.withSuccessHandler(r => {
+                const tb = document.getElementById('promoTableBody'); tb.innerHTML = '';
+                if (r.status === 'success' && r.data.length > 0) {
+                    allPromotions = r.data;
+                    r.data.forEach(p => { tb.innerHTML += `<tr class="border-b"><td>${p.name}</td><td>${p.desc}</td><td class="text-center">${p.quota}</td><td class="text-right"><button onclick="drawPromoWinner('${p.id}')" class="text-emerald-500 mr-2">สุ่ม</button><button onclick="openPromoModal('${p.id}')" class="text-indigo-600 mr-2">Edit</button><button onclick="deletePromo('${p.id}')" class="text-rose-500">Del</button></td></tr>`; });
+                } else { tb.innerHTML = `<tr><td colspan="4" class="text-center py-8">ไม่มีแคมเปญ</td></tr>`; }
+            }).gsGetAllPromotions();
+        }
+        function openPromoModal(id) { document.getElementById('promoModal').classList.add('active'); }
+        function closePromoModal() { document.getElementById('promoModal').classList.remove('active'); }
+    </script>
+</body>
+</html>
