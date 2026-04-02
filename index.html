@@ -113,7 +113,7 @@
     <div id="screen-login-step2" class="screen relative bg-slate-50 !p-0">
         <div class="login-bg"><div class="login-blob-top"></div><div class="login-blob-top-2"></div><div class="login-blob-bottom"></div></div>
 
-        <button type="button" onclick="switchScreen('screen-login-step1')" class="absolute top-8 left-6 text-slate-500 hover:text-slate-800 p-2.5 z-20 bg-white/60 backdrop-blur-md rounded-full shadow-sm border border-white">
+        <button type="button" onclick="switchScreen('screen-login-step1'); haptic('light');" class="absolute top-8 left-6 text-slate-500 hover:text-slate-800 p-2.5 z-20 bg-white/60 backdrop-blur-md rounded-full shadow-sm border border-white">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
         </button>
 
@@ -257,7 +257,7 @@
                 </div>
                 <div class="flex-1 text-left">
                     <h3 class="text-[14px] font-bold text-slate-800 leading-tight mb-1">โบนัสพิเศษประจำเดือน</h3>
-                    <p class="text-[11px] text-slate-500 leading-tight">สะสมคำชื่นชมลุ้นรับรางวัลใหญ่!</p>
+                    <p class="text-[11px] text-slate-50 leading-tight">สะสมคำชื่นชมลุ้นรับรางวัลใหญ่!</p>
                     <div class="reward-progress-bar-container">
                         <div class="reward-progress-bar-fill" style="width: 0%;" id="rewardProgressBar"></div>
                     </div>
@@ -309,8 +309,8 @@
         </div>
         <div class="p-6">
             <div class="flex justify-center mb-10 relative">
-                <label class="relative cursor-pointer hover:opacity-90 transition-opacity block">
-                    <img id="editAvatarPreview" src="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23cbd5e1\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" class="w-28 h-28 rounded-full object-cover border-[4px] shadow-lg border-white relative z-10 bg-slate-100">
+                <label class="relative cursor-pointer hover:opacity-90 transition-opacity block" onclick="haptic('light')">
+                    <img id="editAvatarPreview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23cbd5e1\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" class="w-28 h-28 rounded-full object-cover border-[4px] shadow-lg border-white relative z-10 bg-slate-100">
                     <div class="absolute bottom-0 right-0 bg-blue-600 p-2.5 rounded-full text-white border-2 border-white shadow-sm z-20">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /></svg>
                     </div>
@@ -530,7 +530,7 @@
     const IMGBB_API_KEY = 'b37889052f6fd7b7143ff017d07914df';
     const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
     
-    // 🔥 ตั้งค่า LINE LIFF ID ที่ถูกต้องเป๊ะๆ!
+    // 🔥 แก้ LIFF ID ตรงนี้เป็น L เล็กเรียบร้อยแล้ว!
     const LIFF_ID = "2009559729-LZSwowcl"; 
 
     let tempEmpId='', isUserFirstTime=true, dashboardData={}; 
@@ -571,7 +571,7 @@
 
     window.onload = () => {
         setupPullToRefresh();
-        initializeLiff(); // 🔥 สั่งเปิดระบบดักจับ LINE ทันทีที่โหลดหน้าจอ!
+        initializeLiff(); // เรียกใช้งานระบบดักจับ LINE
         
         setTimeout(() => { 
             if(!document.getElementById('screen-dashboard').classList.contains('active')) { 
@@ -589,23 +589,18 @@
     };
 
     // ==========================================
-    // 🟢 ระบบเชื่อมต่อและดักจับ LINE LIFF (เวอร์ชันสมูท ไม่เด้งแท็บใหม่)
+    // 🟢 ระบบเชื่อมต่อและดักจับ LINE LIFF 
     // ==========================================
     function initializeLiff() {
         if(typeof liff === 'undefined') return;
         
         liff.init({ liffId: LIFF_ID }).then(() => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const action = urlParams.get('action');
-            const linkEmpId = urlParams.get('empId');
-
-            // ถ้ามี empId ส่งมา แปลว่าต้องการเชื่อมต่อ LINE
-            if (action === 'link' && linkEmpId) {
-                if (!liff.isLoggedIn()) {
-                    // ถ้าหลุดล็อกอิน ให้ล็อกอินแล้วกลับมาหน้าเดิมที่มี param
-                    liff.login({ redirectUri: window.location.href });
-                } else {
-                    // ล็อกอินแล้ว ดึงโปรไฟล์เลย
+            if (liff.isLoggedIn()) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const action = urlParams.get('action');
+                const linkEmpId = urlParams.get('empId');
+                
+                if (action === 'link' && linkEmpId) {
                     processLinkLine(linkEmpId);
                 }
             }
@@ -616,6 +611,7 @@
 
     function connectLine() {
         const u = getSession(); if(!u) return;
+        
         Swal.fire({ 
             title: 'เชื่อมต่อ LINE', 
             text: 'ระบบจะนำท่านไปหน้ายืนยันบัญชี LINE', 
@@ -625,8 +621,12 @@
             confirmButtonColor: '#00B900'
         }).then((result) => { 
             if (result.isConfirmed) { 
-                // ท่าไม้ตาย! วิ่งผ่าน liff.line.me โดยตรง ไม่เด้งแท็บใหม่มั่วซั่ว
-                window.location.href = "https://liff.line.me/" + LIFF_ID + "?action=link&empId=" + u.empId;
+                if (!liff.isLoggedIn()) {
+                    const redirectUrl = window.location.origin + window.location.pathname + "?action=link&empId=" + u.empId;
+                    liff.login({ redirectUri: redirectUrl });
+                } else {
+                    processLinkLine(u.empId);
+                }
             } 
         });
     }
@@ -636,7 +636,6 @@
         liff.getProfile().then(profile => {
             const lineUserId = profile.userId;
             
-            // ส่งไปให้ Google Script หลังบ้านบันทึกลง Sheet
             google.script.run.withSuccessHandler(r => {
                 hideLoader();
                 if(r && r.status === 'success') {
@@ -646,7 +645,6 @@
                             u.lineId = lineUserId; 
                             saveSession(u); 
                         }
-                        // เคลียร์ URL กลับมาหน้าแรก
                         window.location.href = window.location.pathname; 
                     });
                 } else {
@@ -655,11 +653,11 @@
             }).withFailureHandler(e => {
                 hideLoader();
                 Swal.fire('เชื่อมต่อล้มเหลว', 'ไม่สามารถส่งข้อมูลไปหลังบ้านได้', 'error').then(()=> window.location.href = window.location.pathname);
-            }).gsLinkLine(empId, lineUserId); // 👈 เรียกฟังก์ชันหลังบ้าน
+            }).gsLinkLine(empId, lineUserId); 
             
         }).catch(err => {
             hideLoader();
-            Swal.fire('ผิดพลาด', 'ไม่สามารถดึงข้อมูลโปรไฟล์ LINE ได้', 'error').then(()=> window.location.href = window.location.pathname);
+            Swal.fire('ผิดพลาด', 'ไม่สามารถดึงข้อมูลโปรไฟล์ LINE ได้', 'error');
         });
     }
     // ==========================================
