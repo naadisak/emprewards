@@ -191,7 +191,7 @@
 
 <script>
     // ==========================================
-    // 🚀 API GATEWAY PROXY
+    // 🚀 API GATEWAY PROXY (ไม้ตายหลบ CORS 100%)
     // ==========================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwmO536QyvMlTMrwiJ-AuoqNSyfimgaaWUYc5qp8UQKMNgap6UGk0TpQL1ZIjTTArjx/exec"; 
 
@@ -199,8 +199,7 @@
         window.google = {
             script: {
                 get run() {
-                    let _success = null;
-                    let _failure = null;
+                    let _success = null; let _failure = null;
                     const runner = {
                         withSuccessHandler: function(cb) { _success = cb; return new Proxy(this, proxyHandler); },
                         withFailureHandler: function(cb) { _failure = cb; return new Proxy(this, proxyHandler); }
@@ -209,14 +208,18 @@
                         get: function(target, prop) {
                             if (prop in target) return target[prop];
                             return function(...args) {
+                                // 🌟 ส่งข้อมูลแบบเปลือยๆ ห้ามใส่ Header เพื่อทะลวงกำแพง Google
                                 fetch(GAS_API_URL, {
-                                    redirect: "follow", method: 'POST',
-                                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                                    method: 'POST',
                                     body: JSON.stringify({ action: prop, args: args })
                                 })
                                 .then(res => res.json())
                                 .then(data => { if (_success) _success(data); })
-                                .catch(err => { if (_failure) _failure(err); });
+                                .catch(err => { 
+                                    console.error("API Error:", err);
+                                    if (_failure) _failure(err); 
+                                    else Swal.fire('ข้อผิดพลาดเครือข่าย', 'โปรดเปิดผ่าน GitHub Pages และหลีกเลี่ยงการเปิดจากไฟล์ในเครื่องตรงๆ (file://)', 'error');
+                                });
                             }
                         }
                     };
