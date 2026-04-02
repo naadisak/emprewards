@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - TQM Life+</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div id="adminLoader"><div class="spinner"></div></div>
+
+    <div id="loginScreen" class="w-full h-full bg-slate-50 flex-col items-center justify-center px-4 relative">
+        <div class="bg-white p-10 rounded-2xl shadow-lg w-full max-w-sm border border-slate-100">
+            <h1 class="text-2xl font-bold text-slate-900 mb-8 text-center">Admin Login</h1>
+            <div class="space-y-5">
+                <input type="text" id="adminId" class="w-full rounded-lg border px-4 py-2.5" placeholder="Employee ID">
+                <input type="password" id="adminPin" class="w-full rounded-lg border px-4 py-2.5" placeholder="PIN Code">
+                <button onclick="doAdminLogin()" class="w-full rounded-lg bg-indigo-600 py-2.5 text-white font-semibold">Sign In</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainApp" class="w-full h-full bg-slate-50 hidden">
+        <aside id="sidebar" class="w-64 bg-white flex flex-col shrink-0 border-r border-slate-200">
+            <div class="flex items-center gap-3 px-6 h-16 border-b border-slate-100 shrink-0"><span class="text-lg font-bold text-slate-900">AdminPanel</span></div>
+            <div class="flex flex-col flex-1 py-6 px-3 overflow-y-auto">
+                <nav class="space-y-1">
+                    <a onclick="switchView('dashboard')" id="nav-dashboard" class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm">📊 Dashboard</a>
+                    <a onclick="switchView('promotions')" id="nav-promotions" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm">✨ Promotions</a> 
+                </nav>
+            </div>
+            <button onclick="doAdminLogout()" class="m-4 bg-slate-100 py-2 rounded-lg text-sm font-bold text-slate-600">Log out</button>
+        </aside>
+
+        <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+            <div class="flex-1 overflow-y-auto p-4 md:p-8">
+                
+                <div id="view-dashboard" class="view-section active max-w-7xl mx-auto space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-blue-600 rounded-2xl p-6 text-white shadow-lg"><p class="text-sm">Total Employees</p><h3 class="text-4xl font-black" id="dashTotalEmp">0</h3></div>
+                        <div class="bg-emerald-500 rounded-2xl p-6 text-white shadow-lg"><p class="text-sm">Active Accounts</p><h3 class="text-4xl font-black" id="dashActiveEmp">0</h3></div>
+                        <div class="bg-rose-500 rounded-2xl p-6 text-white shadow-lg"><p class="text-sm">Total Praises</p><h3 class="text-4xl font-black" id="dashTotalPraises">0</h3></div>
+                        <div class="bg-amber-500 rounded-2xl p-6 text-white shadow-lg"><p class="text-sm">Points Distributed</p><h3 class="text-4xl font-black" id="dashTotalPoints">0</h3></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        <div class="bg-white rounded-2xl shadow-sm p-6 col-span-1 lg:col-span-3 flex flex-col h-[400px]">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-lg">📈 เปรียบเทียบกิจกรรม</h3>
+                                <div class="bg-slate-100 p-1 rounded-lg flex gap-1 text-xs font-bold">
+                                    <button onclick="setChartDateRange(7)" id="btnChart7" class="px-3 py-1.5 rounded-md">7 วัน</button>
+                                    <button onclick="setChartDateRange(30)" id="btnChart30" class="px-3 py-1.5 rounded-md bg-white text-blue-600 shadow-sm">30 วัน</button>
+                                    <button onclick="setChartDateRange(60)" id="btnChart60" class="px-3 py-1.5 rounded-md">60 วัน</button>
+                                </div>
+                            </div>
+                            <div class="relative flex-1 w-full"><canvas id="activityChart"></canvas></div>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-sm p-6 col-span-1 flex flex-col h-[400px]">
+                            <h3 class="font-bold text-lg mb-2">🏷️ หมวดหมู่</h3>
+                            <div id="themeFilterBlock" class="overflow-y-auto flex flex-wrap gap-2 content-start flex-1"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm flex flex-col h-[550px]">
+                        <div class="p-6 border-b flex justify-between items-center">
+                            <h3 class="font-bold text-lg">📋 ประวัติการใช้งานทั้งหมด</h3>
+                            <div class="bg-slate-100 p-1 rounded-lg flex gap-1 text-xs font-bold">
+                                <button onclick="setTableDateRange(7)" id="btnTable7" class="px-3 py-1.5 rounded-md">7 วัน</button>
+                                <button onclick="setTableDateRange(30)" id="btnTable30" class="px-3 py-1.5 rounded-md bg-white text-blue-600 shadow-sm">30 วัน</button>
+                                <button onclick="setTableDateRange(60)" id="btnTable60" class="px-3 py-1.5 rounded-md">60 วัน</button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto flex-1 bg-white rounded-b-2xl">
+                            <table class="w-full text-left text-sm whitespace-nowrap" id="dashTable">
+                                <thead class="bg-slate-50 text-slate-500 text-xs uppercase sticky top-0 shadow-sm">
+                                    <tr>
+                                        <th class="p-3 w-32"><input type="text" id="fltDate" placeholder="📅 วันที่" class="w-full px-2 py-1.5 border rounded" onkeyup="filterDashTable()"></th>
+                                        <th class="p-3 w-48"><input type="text" id="fltSender" placeholder="👤 ผู้ส่ง" class="w-full px-2 py-1.5 border rounded" onkeyup="filterDashTable()"></th>
+                                        <th class="p-3 w-48"><input type="text" id="fltReceiver" placeholder="👤 ผู้รับ" class="w-full px-2 py-1.5 border rounded" onkeyup="filterDashTable()"></th>
+                                        <th class="p-3 w-32"><input type="text" id="fltTheme" placeholder="🏷️ หมวดหมู่" class="w-full px-2 py-1.5 border rounded" onkeyup="filterDashTable()"></th>
+                                        <th class="p-3"><input type="text" id="fltMsg" placeholder="💬 ข้อความ" class="w-full px-2 py-1.5 border rounded" onkeyup="filterDashTable()"></th>
+                                        <th class="p-3 w-20 text-center font-bold">👍 Likes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashHistoryTable"><tr><td colspan="6" class="text-center py-6">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-promotions" class="view-section max-w-7xl mx-auto h-full pb-10">
+                    <div class="bg-white rounded-xl shadow-sm flex flex-col h-auto">
+                        <div class="p-6 border-b shrink-0 flex justify-between items-center">
+                            <h3 class="font-bold text-lg">รายการโปรโมชันพิเศษ</h3>
+                            <button onclick="openPromoModal('')" class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold">+ Add Promotion</button>
+                        </div>
+                        <div class="overflow-x-auto flex-1 bg-white">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead class="bg-slate-50 text-slate-500 text-xs uppercase"><tr><th class="py-4 px-6">Promo_Name</th><th class="py-4 px-6">Promo_Desc</th><th class="py-4 px-6 text-center">Max_Quota</th><th class="py-4 px-6 text-right">Actions</th></tr></thead>
+                                <tbody id="promoTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="promoModal" class="modal-overlay">
+        <div class="modal-box p-6 space-y-4">
+            <h3 class="font-bold text-lg" id="promoModalTitle">Promotion</h3>
+            <input type="hidden" id="promoId">
+            <input type="text" id="promoName" class="w-full rounded-lg border px-3 py-2 text-sm" placeholder="Promo Name">
+            <input type="text" id="promoDesc" class="w-full rounded-lg border px-3 py-2 text-sm" placeholder="Description">
+            <input type="number" id="promoQuota" class="w-full rounded-lg border px-3 py-2 text-sm" placeholder="Quota">
+            <div class="flex justify-end gap-3"><button onclick="closePromoModal()" class="px-4 py-2 border rounded-lg">Cancel</button><button onclick="savePromotion()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg">Save</button></div>
+        </div>
+    </div>
+
+<script src="js/api.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
