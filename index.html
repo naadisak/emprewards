@@ -335,23 +335,20 @@
                         get: function(target, prop) {
                             if (prop in target) return target[prop];
                             return function(...args) {
-                                // 🔥 ทะลวงกำแพง Google ต้องมี Header เป็น text/plain และ redirect: follow
+                                // 🔥 ท่ามาตรฐาน Google: ต้องใช้ text/plain เพื่อหลบ Preflight CORS
                                 fetch(GAS_API_URL, {
-                                    redirect: "follow",
                                     method: 'POST',
                                     headers: {
-                                        "Content-Type": "text/plain;charset=utf-8"
+                                        'Content-Type': 'text/plain;charset=utf-8'
                                     },
                                     body: JSON.stringify({ action: prop, args: args })
                                 })
-                                .then(res => {
-                                    if(!res.ok) throw new Error("Google API Error: " + res.status);
-                                    return res.json();
-                                })
+                                .then(res => res.json())
                                 .then(data => { if (_success) _success(data); })
                                 .catch(err => { 
-                                    console.error("API Error:", err); 
+                                    console.error("CORS / API Error:", err); 
                                     if (_failure) _failure(err); 
+                                    else Swal.fire('ข้อผิดพลาด', 'ไม่สามารถดึงข้อมูลจากเซิร์ฟเวอร์ได้', 'error');
                                 });
                             }
                         }
