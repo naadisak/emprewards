@@ -647,6 +647,8 @@
         showLoader();
         liff.getProfile().then(profile => {
             const lineUserId = profile.userId;
+            const lineAvatar = profile.pictureUrl || ''; // 🔥 ดึงรูปจาก LINE
+            
             google.script.run.withSuccessHandler(r => {
                 hideLoader();
                 if(r && r.status === 'success') {
@@ -654,6 +656,7 @@
                         let u = getSession();
                         if(u && String(u.empId) === String(empId)) { 
                             u.lineId = lineUserId; 
+                            if(lineAvatar) u.avatar = lineAvatar; // อัปเดตรูปในเครื่องมือถือด้วย
                             saveSession(u); 
                         }
                         window.location.href = window.location.pathname; 
@@ -664,14 +667,15 @@
             }).withFailureHandler(e => {
                 hideLoader();
                 Swal.fire('เชื่อมต่อล้มเหลว', 'ไม่สามารถส่งข้อมูลไปหลังบ้านได้', 'error').then(()=> window.location.href = window.location.pathname);
-            }).gsLinkLine(empId, lineUserId); 
+            }).gsLinkLine(empId, lineUserId, lineAvatar); // 🔥 ส่งรูปไปให้หลังบ้านเซฟ
+            
         }).catch(err => {
             hideLoader();
             Swal.fire('ผิดพลาด', 'ไม่สามารถดึงข้อมูลโปรไฟล์ LINE ได้', 'error').then(()=> window.location.href = window.location.pathname);
         });
     }
 
-    // 🔥 ฟังก์ชันเข้าสู่ระบบด้วย LINE (กดจากหน้าใส่ PIN)
+   // 🔥 ฟังก์ชันเข้าสู่ระบบด้วย LINE
     function doLoginWithLine() {
         try {
             if(!tempEmpId) { showToast('กรุณากรอกรหัสพนักงานก่อน', 'error'); return; }
@@ -689,6 +693,8 @@
             
             liff.getProfile().then(profile => {
                 const lineUserId = profile.userId;
+                const lineAvatar = profile.pictureUrl || ''; // 🔥 ดึงรูปจาก LINE
+                
                 google.script.run.withSuccessHandler(r => {
                     hideLoader();
                     if(bText) bText.innerText = originalText;
@@ -710,7 +716,7 @@
                     hideLoader();
                     if(bText) bText.innerText = originalText;
                     showToast('เชื่อมต่อล้มเหลว', 'error');
-                }).gsLoginWithLine(tempEmpId, lineUserId);
+                }).gsLoginWithLine(tempEmpId, lineUserId, lineAvatar); // 🔥 ส่งรูปล่าสุดไปอัปเดต
             }).catch(err => {
                 hideLoader();
                 if(bText) bText.innerText = originalText;
