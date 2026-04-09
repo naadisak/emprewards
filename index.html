@@ -455,14 +455,14 @@
                 <div class="bg-white border border-slate-200 rounded-xl overflow-hidden focus-within:border-blue-500 transition-colors">
                     <textarea id="praiseMsg" rows="3" class="w-full p-4 outline-none resize-none text-[14px] text-slate-600 placeholder:text-slate-400" placeholder="พิมพ์ความในใจของคุณที่นี่..."></textarea>
                     <div class="bg-white p-2 flex justify-center gap-4 px-4 text-xl snap-x pb-3 border-t border-slate-50">
-                        <button type="button" onclick="addEmoji('👍'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">👍</button>
-                        <button type="button" onclick="addEmoji('💖'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">💖</button>
-                        <button type="button" onclick="addEmoji('👏'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">👏</button>
-                        <button type="button" onclick="addEmoji('⭐'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">⭐</button>
-                        <button type="button" onclick="addEmoji('🔥'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">🔥</button>
-                        <button type="button" onclick="addEmoji('🚀'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">🚀</button>
-                        <button type="button" onclick="addEmoji('🎯'); haptic('light');" class="snap-center shrink-0 hover:scale-110 transition-transform">🎯</button>
-                    </div>
+    <button type="button" onpointerdown="event.preventDefault(); addEmoji('👍');" class="snap-center shrink-0 hover:scale-110 transition-transform">👍</button>
+    <button type="button" onpointerdown="event.preventDefault(); addEmoji('💖');" class="snap-center shrink-0 hover:scale-110 transition-transform">💖</button>
+    <button type="button" onpointerdown="event.preventDefault(); addEmoji('👏');" class="snap-center shrink-0 hover:scale-110 transition-transform">👏</button>
+    <button type="button" onpointerdown="event.preventDefault(); addEmoji('⭐');" class="snap-center shrink-0 hover:scale-110 transition-transform">⭐</button>
+    <button type="button" onpointerdown="event.preventDefault(); addEmoji('🔥');" class="snap-center shrink-0 hover:scale-110 transition-transform">🔥</button>
+    <button type="button" onpointerdown="event.preventDefault(); addEmoji('🚀');" class="snap-center shrink-0 hover:scale-110 transition-transform">🚀</button>
+    <button type="button" onpointerdown="event.preventDefault(); addEmoji('🎯');" class="snap-center shrink-0 hover:scale-110 transition-transform">🎯</button>
+</div>
                 </div>
             </div>
             <button type="button" id="btnSubmitPraise" onclick="doSubmitPraise(); haptic('heavy');" class="btn-modern w-full py-4 text-[15px]" disabled><span id="btnSubmitText">ส่งคำชื่นชม</span></button>
