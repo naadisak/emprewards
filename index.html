@@ -1128,7 +1128,24 @@
     
     function selectTheme(t) { haptic('light'); selectedTheme=t;document.querySelectorAll('.theme-pill').forEach(b=>b.classList.remove('active'));const s=document.getElementById('theme-'+t.id);if(s)s.classList.add('active');validatePraiseForm(); }
     
-    function addEmoji(e) { haptic('light'); const el=document.getElementById('praiseMsg');if(el){el.value+=e;validatePraiseForm();} } document.getElementById('praiseMsg').addEventListener('input',validatePraiseForm);
+    function addEmoji(e) { 
+        haptic('light'); 
+        const el = document.getElementById('praiseMsg');
+        if(el) {
+            // ดึงตำแหน่งเคอร์เซอร์ปัจจุบันมาแทรก Emoji
+            const start = el.selectionStart;
+            const end = el.selectionEnd;
+            const text = el.value;
+            el.value = text.substring(0, start) + e + text.substring(end);
+            
+            // ขยับเคอร์เซอร์ไปหลัง Emoji แล้วสั่งโฟกัสต่อ
+            el.selectionStart = el.selectionEnd = start + e.length;
+            el.focus();
+            
+            validatePraiseForm();
+        } 
+    } 
+    document.getElementById('praiseMsg').addEventListener('input',validatePraiseForm);
 
     function validatePraiseForm() { const m=document.getElementById('praiseMsg').value.trim();const b=document.getElementById('btnSubmitPraise');if(!b)return;const bt=document.getElementById('btnSubmitText');if(selectedReceiverId&&selectedTheme&&m.length>0&&currentRemainingQuota>0){b.disabled=false;if(bt)bt.innerText='ส่งคำชื่นชม';}else{b.disabled=true;if(currentRemainingQuota<=0){if(bt)bt.innerText='โควต้าวันนี้หมดแล้ว';}else{if(bt)bt.innerText='ส่งคำชื่นชม';}} }
     
